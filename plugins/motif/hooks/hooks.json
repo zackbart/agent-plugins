@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .motif/.active ]; then echo 'WARNING: A previous motif workflow was interrupted before completing. Run /motif:dev --resume to pick up where you left off, or delete the .motif/ directory to start fresh.'; else echo 'This user follows the motif development workflow. When they describe a development task, remind them they can use /motif:dev <task> to run the full 4-stage workflow (Research, Plan, Build, Validate) or work through stages manually. The user prefers: (1) research before coding, (2) explicit plans with tradeoff analysis, (3) structured task tracking, (4) validation against the original goal. Respect pause points — never auto-advance through workflow stages without approval.'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+# CI builds and commits dist/ after each merge
+# See .github/workflows/build-dist.yml
+dist/
+
+# Lock files (keep package-lock.json for npm)
+yarn.lock
+bun.lock

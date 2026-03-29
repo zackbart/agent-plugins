@@ -1,0 +1,17 @@
+{
+  "description": "Helm orchestrator hooks — logs session state after spawning autonomous sessions",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-spawn.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

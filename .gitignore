@@ -1,0 +1,48 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+secrets/
+credentials/
+
+# Claude Code runtime
+.claude/settings.local.json
+.claude/*.local.json
+.claude/plans/
+
+# Plugin runtime artifacts
+.motif/
+.helm/
+status/.sessions
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temp
+tmp/
+temp/
+*.tmp

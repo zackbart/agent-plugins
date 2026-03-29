@@ -1,0 +1,13 @@
+{
+  "name": "claude-hud",
+  "version": "0.0.14",
+  "description": "Real-time statusline HUD for Claude Code - context health, tool activity, agent tracking, and todo progress",
+  "author": {
+    "name": "Zack Bart"
+  },
+  "commands": [
+    "./commands/setup.md",
+    "./commands/configure.md"
+  ],
+  "keywords": ["hud", "monitoring", "statusline", "context", "tools", "agents", "todos", "claude-code"]
+}

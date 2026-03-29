@@ -1,0 +1,5 @@
+{
+  "name": "helm",
+  "version": "0.1.0",
+  "description": "Orchestrates fully autonomous agent sessions that take a task from discovery through to a merged PR without human interaction."
+}
