@@ -56,14 +56,17 @@ echo "$CURSOR_OUTPUT"
 
 ### 3. Write output and return
 
-Write the Cursor output to `.motif/critic-output.md`:
+Write the Cursor output to `.motif/critic-output.md`. **The orchestrator reads this file — if it doesn't exist, the review is lost.**
 
 ```bash
-cat << 'CRITIC_EOF' > .motif/critic-output.md
+mkdir -p .motif && cat << 'CRITIC_EOF' > .motif/critic-output.md
 # Critic Review (Cursor Agent / gpt-5.4-medium)
 <cursor output here>
 CRITIC_EOF
+[ -f .motif/critic-output.md ] && echo "OK: $(wc -l < .motif/critic-output.md) lines written" || echo "WRITE FAILED"
 ```
+
+**If the verify prints "WRITE FAILED", retry the write immediately.**
 
 Return a short confirmation under 200 tokens:
 > Critique written to `.motif/critic-output.md`. [1-2 sentence summary of what Cursor found].

@@ -43,14 +43,17 @@ Read `.motif/context.md` first.
 
 Write to `.motif/validator-output.md` via Bash as your **penultimate action**:
 
+**The orchestrator reads this file — if it doesn't exist, your validation is lost.**
+
 ```bash
-cat << 'VALIDATOR_EOF' > .motif/validator-output.md
+mkdir -p .motif && cat << 'VALIDATOR_EOF' > .motif/validator-output.md
 # Validation Report
 ...
 VALIDATOR_EOF
+[ -f .motif/validator-output.md ] && echo "OK: $(wc -l < .motif/validator-output.md) lines written" || echo "WRITE FAILED"
 ```
 
-After writing, verify: `[ -f .motif/validator-output.md ] && echo "OK" || echo "WRITE FAILED"`
+**If the verify prints "WRITE FAILED", retry the write immediately.**
 
 **Verdict**: PASS | PASS WITH NOTES | ISSUES FOUND
 

@@ -14,7 +14,7 @@ npx skills add zackbart/motif
 
 Copy the relevant sections from this directory's `opencode.json` into your project's `opencode.json`:
 
-- **`agent`** — adds 6 subagents (researcher, critic, codex-critic, cursor-critic, builder, validator)
+- **`agent`** — adds 7 subagents (researcher, critic, codex-critic, cursor-critic, builder, validator, web-researcher)
 - **`command`** — adds the `/dev` command
 - **`plugin`** — registers the motif plugin for state management
 - **`mcp`** — adds Context7 for documentation lookups (optional)
@@ -49,6 +49,14 @@ If you place the files somewhere other than the project root, update the `{file:
 | `agents/cursor-critic.md` | Plan review relay via Cursor Agent / gpt-5.4 (Stage 2) |
 | `agents/builder.md` | Write-capable task execution (Stage 3) |
 | `agents/validator.md` | Independent build audit (Stage 4) |
+| `agents/web-researcher.md` | Deep web research for external knowledge (on-demand) |
+
+## Configuration notes
+
+- Uses the `permission` system (replaces deprecated `tools` config)
+- Each agent has a `steps` limit matching Claude Code's `maxTurns`
+- Model: `anthropic/claude-sonnet-4-6-20250514` (Sonnet 4.6)
+- Plugin uses structured logging via `client.app.log()`
 
 ## Known limitations vs Claude Code
 
@@ -59,3 +67,4 @@ If you place the files somewhere other than the project root, update the `{file:
 | Approval gate | AskUserQuestion tool | Conversational pause |
 | Session hooks | SessionStart hook | Plugin event handler |
 | Skill invocation | Skill tool (session-level) | Read SKILL.md directly |
+| Context7 MCP | In agent tool list | Via global MCP config |

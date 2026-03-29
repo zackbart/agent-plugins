@@ -1,7 +1,7 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import { tool } from "@opencode-ai/plugin"
 
-export const MotifPlugin: Plugin = async ({ directory, $ }) => {
+export const MotifPlugin: Plugin = async ({ directory, $, client }) => {
   const motifDir = `${directory}/.motif`
   const statePath = `${motifDir}/state.json`
   const activePath = `${motifDir}/.active`
@@ -107,10 +107,13 @@ export const MotifPlugin: Plugin = async ({ directory, $ }) => {
             const stateFile = Bun.file(statePath)
             if (await stateFile.exists()) {
               const state = JSON.parse(await stateFile.text())
-              console.log(
-                `[motif] Interrupted workflow detected — task: "${state.task}", ` +
-                `stage: ${state.stage}. Use /dev --resume to continue.`
-              )
+              await client.app.log({
+                body: {
+                  service: "motif",
+                  level: "warn",
+                  message: `Interrupted workflow detected — task: "${state.task}", stage: ${state.stage}. Use /dev --resume to continue.`,
+                },
+              })
             }
           }
         } catch {

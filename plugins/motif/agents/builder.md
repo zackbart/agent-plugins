@@ -32,8 +32,10 @@ You receive:
 2. **Implement** — write code, match existing style, write tests alongside code, run tests. Use Context7 MCP to look up library docs if unsure about an API.
 3. **Report** — write to the output file the orchestrator specified:
 
+**The orchestrator reads this file — if it doesn't exist, your work report is lost.**
+
 ```bash
-cat << 'BUILDER_EOF' > .motif/builder-<name>-output.md
+mkdir -p .motif && cat << 'BUILDER_EOF' > .motif/builder-<name>-output.md
 # Builder Report: <task>
 
 **Status:** completed|failed
@@ -44,9 +46,10 @@ cat << 'BUILDER_EOF' > .motif/builder-<name>-output.md
 
 **Issues:** (if any)
 BUILDER_EOF
+[ -f .motif/builder-<name>-output.md ] && echo "OK: $(wc -l < .motif/builder-<name>-output.md) lines written" || echo "WRITE FAILED"
 ```
 
-After writing, verify the file exists: `[ -f .motif/builder-<name>-output.md ] && echo "OK" || echo "WRITE FAILED"`
+**If the verify prints "WRITE FAILED", retry the write immediately.**
 
 Then return a short confirmation:
 > Report written to `.motif/builder-<name>-output.md`. Status: [completed/failed]. [1 sentence]. Files: [N]. Tests: [pass/fail].

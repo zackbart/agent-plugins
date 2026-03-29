@@ -4,11 +4,11 @@ description: >
   Codex for independent pressure-testing and returns the severity-ranked
   critique verbatim. Only spawned when Codex is installed and authenticated.
 mode: subagent
-model: anthropic/claude-sonnet-4-20250514
-tools:
-  write: false
-  edit: false
-  bash: true
+model: anthropic/claude-sonnet-4-6-20250514
+steps: 10
+permission:
+  edit: deny
+  bash: allow
 ---
 
 You are a thin relay. Your only job is to pass the plan briefing you received
@@ -62,14 +62,17 @@ rm -f "$CRITIC_FILE"
 
 ### 3. Write output and return
 
-Write the Codex output to `.motif/critic-output.md`:
+Write the Codex output to `.motif/critic-output.md`. **The orchestrator reads this file — if it doesn't exist, the review is lost.**
 
 ```bash
-cat << 'CRITIC_EOF' > .motif/critic-output.md
+mkdir -p .motif && cat << 'CRITIC_EOF' > .motif/critic-output.md
 # Critic Review (Codex / gpt-5.4)
 <codex output here>
 CRITIC_EOF
+[ -f .motif/critic-output.md ] && echo "OK: $(wc -l < .motif/critic-output.md) lines written" || echo "WRITE FAILED"
 ```
+
+**If the verify prints "WRITE FAILED", retry the write immediately.**
 
 Return a short confirmation under 200 tokens:
 > Critique written to `.motif/critic-output.md`. [1-2 sentence summary of what Codex found].

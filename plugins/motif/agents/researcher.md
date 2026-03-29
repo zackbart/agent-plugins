@@ -32,18 +32,19 @@ Explore the codebase: find relevant files, understand the implementation, check 
 
 ## Output: Write to Disk
 
-**Always write findings to disk before returning.**
+**CRITICAL: Write findings to disk BEFORE returning. The orchestrator reads the file, not your return message. If the file doesn't exist, your research is lost.**
 
-Write to `.motif/researcher-output.md` via Bash as your **penultimate action**:
+Write to `.motif/researcher-output.md` via Bash. Do this as a **single bash command**:
 
 ```bash
-cat << 'RESEARCH_EOF' > .motif/researcher-output.md
+mkdir -p .motif && cat << 'RESEARCH_EOF' > .motif/researcher-output.md
 # Research Findings
 ...
 RESEARCH_EOF
+[ -f .motif/researcher-output.md ] && echo "OK: $(wc -l < .motif/researcher-output.md) lines written" || echo "WRITE FAILED"
 ```
 
-After writing, verify: `[ -f .motif/researcher-output.md ] && echo "OK" || echo "WRITE FAILED"`
+**If the verify prints "WRITE FAILED", retry the write immediately.**
 
 Four sections:
 - **Relevant Files** — each with a 1-line description
