@@ -5,6 +5,8 @@
   "author": {
     "name": "Zack Bart"
   },
+  "license": "MIT",
+  "keywords": ["orchestration", "autonomous", "pipeline", "pr"],
   "skills": "./skills/",
   "hooks": "./hooks/hooks.json"
 }

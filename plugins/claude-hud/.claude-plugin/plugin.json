@@ -5,6 +5,7 @@
   "author": {
     "name": "Zack Bart"
   },
+  "license": "MIT",
   "commands": [
     "./commands/setup.md",
     "./commands/configure.md"
