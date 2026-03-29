@@ -40,8 +40,14 @@ Before spawning, build a complete context packet. All fields are required — if
 Once the context packet is complete, spawn via bash:
 
 ```bash
-cd <project_dir> && claude --system-prompt "$(cat ${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/SKILL.md)" --allowedTools "Read,Write,Edit,Bash,Glob,Grep,Agent" "<context_packet_as_structured_text>"
+cd <project_dir> && claude -p --system-prompt "$(cat ${CLAUDE_PLUGIN_ROOT}/skills/bootstrap/SKILL.md)" --allowedTools "Read,Write,Edit,Bash,Glob,Grep,Agent" --dangerously-skip-permissions "<context_packet_as_structured_text>"
 ```
+
+Key flags:
+- `-p` (print mode): non-interactive — the session runs to completion without waiting for TTY input
+- `--system-prompt`: injects the bootstrap pipeline contract
+- `--allowedTools`: scopes the session to only the tools it needs
+- `--dangerously-skip-permissions`: the spawned session is autonomous and cannot prompt for user approval
 
 Run the spawn in the background. The spawned session operates fully autonomously from this point.
 

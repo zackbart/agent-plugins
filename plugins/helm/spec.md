@@ -71,7 +71,7 @@ Defines the orchestrator's identity, constraints, and how to spawn a session.
 
 **Spawning a session**
 1. Build a context packet (see schemas/context-packet.md)
-2. Shell out via bash: `cd <project_dir> && claude --system-prompt "$(cat skills/bootstrap/SKILL.md)" "<task_summary>"`
+2. Shell out via bash: `cd <project_dir> && claude -p --system-prompt "$(cat skills/bootstrap/SKILL.md)" --allowedTools "Read,Write,Edit,Bash,Glob,Grep,Agent" --dangerously-skip-permissions "<context_packet>"`
 3. Log the session to status/.sessions with: session ID, project dir, task summary, stage (discovery), timestamp
 
 **Tracking**
@@ -96,20 +96,23 @@ Injected into every spawned session at spawn time via `--system-prompt`. Defines
 - It owns the complete pipeline: discovery → plan → implement → test → PR.
 - If it cannot proceed, it escalates to the orchestrator using the escalation format, then stops.
 
+**Branch creation**
+Before any stage begins, create the feature branch specified in the context packet.
+
 **Pipeline stages**
 
-Each stage has entry criteria, exit criteria, and a default retry budget. Retries are guidance, not hard limits — escalate when no progress is being made between attempts, not after a fixed count.
+Each stage is delegated to a named subagent via the Agent tool. The bootstrap session manages stage transitions, verifies artifacts, and handles escalation. Each stage has entry criteria, exit criteria, and a default retry budget. Retries are guidance, not hard limits — escalate when no progress is being made between attempts, not after a fixed count.
 
-| Stage | Entry | Exit | Default retries |
-|---|---|---|---|
-| Discovery | Context packet received | Findings document written | 2 |
-| Planning | Findings document exists | Implementation plan written with discrete steps | 2 |
-| Implementation | Plan exists | All steps complete, code committed | 3 per step |
-| Testing | Implementation complete | All tests pass | 3 |
-| PR | Tests pass | PR open with description | 1 |
+| Stage | Agent | Entry | Exit | Default retries |
+|---|---|---|---|---|
+| Discovery | `discovery` | Context packet received | Findings document written | 2 |
+| Planning | `planning` | Findings document exists | Implementation plan written with discrete steps | 2 |
+| Implementation | `implementation` | Plan exists | All steps complete, code committed | 3 per step |
+| Testing | `testing` | Implementation complete | All tests pass | 3 |
+| PR | `pr` | Tests pass | PR open with description | 1 |
 
 **On exhausting retries**
-Use escalation/SKILL.md to report the blocker to the orchestrator. Include stage, attempts made, and what is needed to proceed. Then stop.
+Write escalation to `.helm/escalation.md` using the standard format (inlined in the bootstrap skill), update status, and stop.
 
 **Stage transitions**
 Each stage writes its output to a known file in the project's `.helm/` directory so the next stage has a clear handoff artifact.

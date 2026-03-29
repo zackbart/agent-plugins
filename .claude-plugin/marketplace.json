@@ -34,7 +34,7 @@
     {
       "name": "helm",
       "description": "Orchestrates fully autonomous agent sessions that take a task from discovery through to a merged PR without human interaction.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Zack Bart"
       },

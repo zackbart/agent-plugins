@@ -8,19 +8,19 @@ Helm has two layers:
 
 1. **The Orchestrator** — a persistent Claude Code session you talk to. It receives your intent, builds a context packet, spawns an autonomous session, and tracks its status. It never does implementation work.
 
-2. **Spawned Sessions** — fully autonomous Claude Code sessions that run in your project directories. Each one owns the full pipeline: discovery, planning, implementation, testing, and PR creation. They never interact with you directly.
+2. **Spawned Sessions** — fully autonomous Claude Code sessions that run in your project directories. Each one owns the full pipeline: discovery, planning, implementation, testing, and PR creation. Each stage is delegated to a dedicated subagent with scoped tool access. They never interact with you directly.
 
 ## Pipeline Stages
 
 Every spawned session follows the same five stages in order:
 
-| Stage | What it does | Output |
-|---|---|---|
-| Discovery | Explores the codebase read-only | `.helm/findings.md` |
-| Planning | Produces a step-by-step implementation plan | `.helm/plan.md` |
-| Implementation | Executes the plan, commits per step | `.helm/implementation.md` |
-| Testing | Runs the test suite, fixes failures | All tests passing |
-| PR | Opens a pull request via `gh` | PR URL in `.helm/status.json` |
+| Stage | Agent | What it does | Output |
+|---|---|---|---|
+| Discovery | `discovery` | Explores the codebase read-only | `.helm/findings.md` |
+| Planning | `planning` | Produces a step-by-step implementation plan | `.helm/plan.md` |
+| Implementation | `implementation` | Executes the plan, commits per step | `.helm/implementation.md` |
+| Testing | `testing` | Runs the test suite, fixes failures | All tests passing |
+| PR | `pr` | Opens a pull request via `gh` | PR URL in `.helm/status.json` |
 
 If any stage fails after retries, the session writes an escalation report and stops. The orchestrator surfaces the escalation to you.
 
