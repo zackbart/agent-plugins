@@ -39,11 +39,21 @@ export async function getGitBranch(cwd?: string): Promise<string | null> {
   }
 }
 
-export async function getGitStatus(cwd?: string): Promise<GitStatus | null> {
+export interface GitStatusOptions {
+  showAheadBehind?: boolean;
+  showFileStats?: boolean;
+}
+
+export async function getGitStatus(cwd?: string, options?: GitStatusOptions): Promise<GitStatus | null> {
   if (!cwd) return null;
 
+  // Determine which optional subprocesses to run.
+  // When options is not provided (backward compat), run all subprocesses.
+  const runAheadBehind = options === undefined || options.showAheadBehind === true;
+  const runDiffStats = options === undefined || options.showFileStats === true;
+
   try {
-    // Get branch name
+    // Get branch name first — needed for early return check
     const { stdout: branchOut } = await execFileAsync(
       'git',
       ['rev-parse', '--abbrev-ref', 'HEAD'],
@@ -52,53 +62,60 @@ export async function getGitStatus(cwd?: string): Promise<GitStatus | null> {
     const branch = branchOut.trim();
     if (!branch) return null;
 
-    // Check for dirty state and parse file stats
-    let isDirty = false;
-    let fileStats: FileStats | undefined;
-    try {
-      const { stdout: statusOut } = await execFileAsync(
+    // Run remaining subprocesses in parallel
+    const [statusResult, aheadBehindResult, diffResult] = await Promise.all([
+      // Subprocess 2: dirty state + file stats (always run)
+      execFileAsync(
         'git',
         ['--no-optional-locks', 'status', '--porcelain'],
         { cwd, timeout: 1000, encoding: 'utf8' }
-      );
-      const trimmed = statusOut.trim();
+      ).catch(() => null),
+
+      // Subprocess 3: ahead/behind (gated on showAheadBehind)
+      runAheadBehind
+        ? execFileAsync(
+            'git',
+            ['rev-list', '--left-right', '--count', '@{upstream}...HEAD'],
+            { cwd, timeout: 1000, encoding: 'utf8' }
+          ).catch(() => null)
+        : Promise.resolve(null),
+
+      // Subprocess 4: diff shortstat (gated on showFileStats)
+      runDiffStats
+        ? execFileAsync(
+            'git',
+            ['diff', 'HEAD', '--shortstat'],
+            { cwd, timeout: 1000, encoding: 'utf8' }
+          ).catch(() => null)
+        : Promise.resolve(null),
+    ]);
+
+    // Parse dirty state and file stats
+    let isDirty = false;
+    let fileStats: FileStats | undefined;
+    if (statusResult) {
+      const trimmed = statusResult.stdout.trim();
       isDirty = trimmed.length > 0;
       if (isDirty) {
         fileStats = parseFileStats(trimmed);
       }
-    } catch {
-      // Ignore errors, assume clean
     }
 
-    // Get ahead/behind counts
+    // Parse ahead/behind counts
     let ahead = 0;
     let behind = 0;
-    try {
-      const { stdout: revOut } = await execFileAsync(
-        'git',
-        ['rev-list', '--left-right', '--count', '@{upstream}...HEAD'],
-        { cwd, timeout: 1000, encoding: 'utf8' }
-      );
-      const parts = revOut.trim().split(/\s+/);
+    if (aheadBehindResult) {
+      const parts = aheadBehindResult.stdout.trim().split(/\s+/);
       if (parts.length === 2) {
         behind = parseInt(parts[0], 10) || 0;
         ahead = parseInt(parts[1], 10) || 0;
       }
-    } catch {
-      // No upstream or error, keep 0/0
     }
 
-    // Get diff line stats (insertions/deletions vs HEAD)
+    // Parse diff line stats
     let diffStats: DiffStats | undefined;
-    try {
-      const { stdout: diffOut } = await execFileAsync(
-        'git',
-        ['diff', 'HEAD', '--shortstat'],
-        { cwd, timeout: 1000, encoding: 'utf8' }
-      );
-      diffStats = parseShortstat(diffOut.trim());
-    } catch {
-      // No HEAD (empty repo) or error, skip
+    if (diffResult) {
+      diffStats = parseShortstat(diffResult.stdout.trim());
     }
 
     return { branch, isDirty, ahead, behind, fileStats, diffStats };

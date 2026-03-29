@@ -71,7 +71,10 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
 
     const needsGit = config.gitStatus.enabled || linesElements?.has('git') || linesElements?.has('diff');
     const gitStatus = needsGit
-      ? await deps.getGitStatus(stdin.cwd)
+      ? await deps.getGitStatus(stdin.cwd, {
+          showAheadBehind: config.gitStatus.showAheadBehind,
+          showFileStats: config.gitStatus.showFileStats,
+        })
       : null;
 
     // Usage comes only from Claude Code's official stdin rate_limits fields.

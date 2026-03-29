@@ -28,7 +28,6 @@ function getCachePath(homeDir: string): string {
 function readCache(homeDir: string): SpeedCache | null {
   try {
     const cachePath = getCachePath(homeDir);
-    if (!fs.existsSync(cachePath)) return null;
     const content = fs.readFileSync(cachePath, 'utf8');
     const parsed = JSON.parse(content) as SpeedCache;
     if (typeof parsed.outputTokens !== 'number' || typeof parsed.timestamp !== 'number') {

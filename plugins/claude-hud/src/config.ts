@@ -391,17 +391,71 @@ export function mergeConfig(userConfig: Partial<HudConfig>): HudConfig {
   return { lineLayout, showSeparators, pathLevels, elementOrder, lines, theme, gitStatus, display, colors };
 }
 
+interface ConfigCache {
+  configPath: string;
+  mtimeMs: number;
+  config: HudConfig;
+}
+
+function getConfigCachePath(): string {
+  const homeDir = os.homedir();
+  return path.join(getHudPluginDir(homeDir), '.config-cache.json');
+}
+
+function readConfigCache(cachePath: string): ConfigCache | null {
+  try {
+    const raw = fs.readFileSync(cachePath, 'utf-8');
+    const parsed = JSON.parse(raw) as unknown;
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      typeof (parsed as Record<string, unknown>).configPath === 'string' &&
+      typeof (parsed as Record<string, unknown>).mtimeMs === 'number' &&
+      typeof (parsed as Record<string, unknown>).config === 'object'
+    ) {
+      return parsed as ConfigCache;
+    }
+  } catch {
+    // Cache read failed — non-fatal
+  }
+  return null;
+}
+
+function writeConfigCache(cachePath: string, entry: ConfigCache): void {
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify(entry), 'utf-8');
+  } catch {
+    // Cache write failed — non-fatal
+  }
+}
+
 export async function loadConfig(): Promise<HudConfig> {
   const configPath = getConfigPath();
 
   try {
-    if (!fs.existsSync(configPath)) {
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(configPath);
+    } catch {
+      // File does not exist
       return DEFAULT_CONFIG;
+    }
+
+    const mtimeMs = stat.mtimeMs;
+    const cachePath = getConfigCachePath();
+    const cache = readConfigCache(cachePath);
+
+    if (cache !== null && cache.configPath === configPath && cache.mtimeMs === mtimeMs) {
+      return cache.config;
     }
 
     const content = fs.readFileSync(configPath, 'utf-8');
     const userConfig = JSON.parse(content) as Partial<HudConfig>;
-    return mergeConfig(userConfig);
+    const config = mergeConfig(userConfig);
+
+    writeConfigCache(cachePath, { configPath, mtimeMs, config });
+
+    return config;
   } catch {
     return DEFAULT_CONFIG;
   }
