@@ -1,12 +1,11 @@
 {
   "name": "helm",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Orchestrates fully autonomous agent sessions that take a task from discovery through to a merged PR without human interaction.",
   "author": {
     "name": "Zack Bart"
   },
   "license": "MIT",
   "keywords": ["orchestration", "autonomous", "pipeline", "pr"],
-  "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "skills": "./skills/"
 }
