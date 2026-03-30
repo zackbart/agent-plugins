@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.4"
+  version: "0.9.5"
 argument-hint: "<task description> [--critic codex|cursor|claude|skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -45,7 +45,7 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
 2. Write `.motif/.active` (empty flag file)
 3. Write `.motif/state.json`:
    ```json
-   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "tasks": [] }
+   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "tasks": [] }
    ```
    Save `baseCommit` so the validator can diff against the pre-workflow state.
 4. Write `.motif/context.md` with sections in this fixed order:
@@ -149,7 +149,7 @@ Without a researcher subagent, research directly.
 
 ### Post-Research
 
-Replace the `## Research` section in `.motif/context.md` with findings. Update state.json stage to `"plan"`.
+Replace the `## Research` section in `.motif/context.md` with findings. Update state.json: set stage to `"plan"` and `stageStartedAt` to the current ISO timestamp.
 
 If research surfaced genuine unknowns (multiple approaches, unclear scope), ask the user before proceeding. Skip for light tasks or clear findings.
 
@@ -192,7 +192,7 @@ Triage each point: **ACCEPT** (state the plan change) or **REJECT** (provide evi
 
 ### Post-Plan
 
-Replace the `## Plan` section in `.motif/context.md` with the approved plan. Update state.json stage to `"build"`.
+Replace the `## Plan` section in `.motif/context.md` with the approved plan. Update state.json: set stage to `"build"` and `stageStartedAt` to the current ISO timestamp.
 
 ---
 
@@ -257,7 +257,7 @@ For routine issues, handle them and continue. After all tasks complete, proceed 
 
 Runs automatically after Build.
 
-Remove `.motif/.active`. Update state.json stage to `"validate"`.
+Remove `.motif/.active`. Update state.json: set stage to `"validate"` and `stageStartedAt` to the current ISO timestamp.
 
 Spawn the `validator` subagent with:
 1. Original task description

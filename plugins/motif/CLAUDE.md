@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.4.
+A cross-platform development workflow plugin. Version 0.9.5.
 
 ## Project structure
 
