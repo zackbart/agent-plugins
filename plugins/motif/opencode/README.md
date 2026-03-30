@@ -14,10 +14,10 @@ npx skills add zackbart/motif
 
 Copy the relevant sections from this directory's `opencode.json` into your project's `opencode.json`:
 
-- **`agent`** — adds 7 subagents (researcher, critic, codex-critic, cursor-critic, builder, validator, web-researcher)
-- **`command`** — adds the `/dev` command
-- **`plugin`** — registers the motif plugin for state management
-- **`mcp`** — adds Context7 for documentation lookups (optional)
+- **`agent`** - adds 7 subagents (researcher, critic, codex-critic, cursor-critic, builder, validator, web-researcher)
+- **`command`** - adds the `/dev` command
+- **`plugin`** - registers the motif plugin for state management
+- **`mcp`** - adds Context7 for documentation lookups (optional)
 
 The `plugin.ts` file and `agents/` directory should be placed where your `opencode.json` can reference them. You can either:
 

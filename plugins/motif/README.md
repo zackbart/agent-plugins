@@ -2,7 +2,7 @@
 
 A structured 4-stage development workflow for AI coding agents: **Research → Plan → Build → Validate**.
 
-Works with any agent that supports the [Agent Skills](https://agentskills.io) standard — including [Claude Code](https://claude.com/claude-code), [OpenAI Codex CLI](https://github.com/openai/codex), [Cursor](https://cursor.com), and [40+ other platforms](https://agentskills.io/home).
+Works with any agent that supports the [Agent Skills](https://agentskills.io) standard - including [Claude Code](https://claude.com/claude-code), [OpenAI Codex CLI](https://github.com/openai/codex), [Cursor](https://cursor.com), and [40+ other platforms](https://agentskills.io/home).
 
 Motif ensures you research before coding, plan with tradeoff analysis, track tasks explicitly, and validate against the original goal.
 
@@ -30,7 +30,7 @@ Then install the plugin:
 /plugin install motif@motif
 ```
 
-Or use the interactive plugin browser — run `/plugin`, go to **Discover**, and install from there.
+Or use the interactive plugin browser - run `/plugin`, go to **Discover**, and install from there.
 
 This gives you all skills plus dedicated subagents (researcher, critic, builder, validator), session hooks, and workflow state persistence.
 
@@ -81,7 +81,7 @@ $dev --resume                        # Codex CLI
 
 ## Workflow Stages
 
-The plan (Stage 2) is the single approval gate — once approved, Build and Validate run autonomously.
+The plan (Stage 2) is the single approval gate - once approved, Build and Validate run autonomously.
 
 ### 1. Research
 
@@ -92,10 +92,10 @@ Read-only codebase exploration. Depth scales automatically based on task complex
 Implementation plan based on research findings. Medium and heavy tasks include tradeoff analysis and risk assessment.
 
 For medium/heavy tasks, you choose which critic reviews your plan:
-- **Codex critic (gpt-5.4)** — independent adversarial review via Codex CLI (when available)
-- **Cursor critic (gpt-5.4)** — independent adversarial review via Cursor Agent CLI (when available)
-- **Claude critic** — built-in critic subagent
-- **Skip critic** — no critic review
+- **Codex critic (gpt-5.4)** - independent adversarial review via Codex CLI (when available)
+- **Cursor critic (gpt-5.4)** - independent adversarial review via Cursor Agent CLI (when available)
+- **Claude critic** - built-in critic subagent
+- **Skip critic** - no critic review
 
 This choice is presented right after complexity assessment, before research begins.
 
@@ -109,7 +109,7 @@ Independent audit of the completed work against the original task. On Claude Cod
 
 ## State Persistence
 
-Workflow state is saved to a `.motif/` directory in the project root during execution. This enables resuming interrupted workflows with `--resume`. The directory is automatically cleaned up on successful completion — nothing persists after a finished workflow.
+Workflow state is saved to a `.motif/` directory in the project root during execution. This enables resuming interrupted workflows with `--resume`. The directory is automatically cleaned up on successful completion - nothing persists after a finished workflow.
 
 ### State Schema
 
@@ -149,11 +149,11 @@ When installed as a Claude Code plugin, motif includes additional features:
 | Feature | Description |
 |---------|-------------|
 | Research subagent | Dedicated Sonnet agent for codebase exploration (Stage 1) |
-| Critic subagent | Adversarial plan review — user chooses between Codex CLI (gpt-5.4), Cursor Agent (gpt-5.4), Claude critic, or skip (Stage 2) |
+| Critic subagent | Adversarial plan review - user chooses between Codex CLI (gpt-5.4), Cursor Agent (gpt-5.4), Claude critic, or skip (Stage 2) |
 | Builder subagent | Write-capable Sonnet agent for parallel task execution (Stage 3) |
 | Validator subagent | Independent Sonnet agent that audits builds against the original goal (Stage 4) |
 | Web researcher | Deep web research agent for external knowledge (spawned on demand, not part of 4-stage flow) |
-| State persistence | Workflow state in `.motif/` — resume interrupted workflows with `--resume` |
+| State persistence | Workflow state in `.motif/` - resume interrupted workflows with `--resume` |
 | Session hooks | Detects interrupted workflows on session start |
 
 ## Platform Compatibility
@@ -173,13 +173,13 @@ When installed as a Claude Code plugin, motif includes additional features:
 ```
 skills/dev/              # Core 4-stage workflow (universal skill)
 agents/                  # Claude Code subagents (Sonnet)
-  researcher.md          # Codebase exploration (Stage 1: Research) — read-only
-  codex-critic.md        # Adversarial plan review via Codex CLI/gpt-5.4 (Stage 2) — read-only
-  cursor-critic.md       # Adversarial plan review via Cursor Agent/gpt-5.4 (Stage 2) — read-only
-  critic.md              # Adversarial plan review via Claude (Stage 2) — read-only
-  builder.md             # Task execution (Stage 3: Build) — write-capable
-  validator.md           # Independent build audit (Stage 4: Validate) — read-only
-  web-researcher.md      # Deep web research (on-demand) — read-only
+  researcher.md          # Codebase exploration (Stage 1: Research) - read-only
+  codex-critic.md        # Adversarial plan review via Codex CLI/gpt-5.4 (Stage 2) - read-only
+  cursor-critic.md       # Adversarial plan review via Cursor Agent/gpt-5.4 (Stage 2) - read-only
+  critic.md              # Adversarial plan review via Claude (Stage 2) - read-only
+  builder.md             # Task execution (Stage 3: Build) - write-capable
+  validator.md           # Independent build audit (Stage 4: Validate) - read-only
+  web-researcher.md      # Deep web research (on-demand) - read-only
   references/            # Shared agent reference docs (critic process)
 opencode/                # OpenCode configuration
   opencode.json          # Agent definitions, /dev command, MCP config

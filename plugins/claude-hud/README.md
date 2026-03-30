@@ -1,6 +1,6 @@
 # claude-hud
 
-Real-time statusline HUD for Claude Code. Shows context health, tool activity, agent tracking, todo progress, and rate limit usage — always visible below your input.
+Real-time statusline HUD for Claude Code. Shows context health, tool activity, agent tracking, todo progress, and rate limit usage - always visible below your input.
 
 ```
 [Opus] │ my-project git:(main*)
@@ -18,7 +18,7 @@ Then run `/claude-hud:setup` inside Claude Code.
 
 ## Layout
 
-The HUD uses a flexible `lines` config — you control what goes on each line:
+The HUD uses a flexible `lines` config - you control what goes on each line:
 
 ```json
 {
@@ -52,7 +52,7 @@ The HUD uses a flexible `lines` config — you control what goes on each line:
 | `todos` | Todo progress |
 | `project` | Bundle of model+path+git+session+version+speed+duration+customLabel |
 
-Placing an element in `lines` auto-enables it — no need to also set `display.showTools: true` etc.
+Placing an element in `lines` auto-enables it - no need to also set `display.showTools: true` etc.
 
 If `lines` is not set, the classic `elementOrder` flat array still works.
 
@@ -110,7 +110,7 @@ Edit `~/.claude/plugins/claude-hud/config.json` or use `/claude-hud:configure`.
 | `lineLayout` | `expanded` | `expanded` or `compact` |
 | `showSeparators` | `false` | Line between header and activity |
 | `pathLevels` | `1` | Path segments to show (1-3) |
-| `theme` | — | Named color theme |
+| `theme` | - | Named color theme |
 | `display.showModel` | `true` | Model badge |
 | `display.showProject` | `true` | Project path |
 | `display.showContextBar` | `true` | Context bar |

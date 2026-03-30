@@ -6,9 +6,9 @@ A Claude Code plugin for orchestrating fully autonomous agent sessions that take
 
 Helm has two layers:
 
-1. **The Orchestrator** — a persistent Claude Code session you talk to. It receives your intent, builds a context packet, spawns an autonomous session, and tracks its status. It never does implementation work.
+1. **The Orchestrator** - a persistent Claude Code session you talk to. It receives your intent, builds a context packet, spawns an autonomous session, and tracks its status. It never does implementation work.
 
-2. **Spawned Sessions** — fully autonomous Claude Code sessions that run in your project directories. Each one owns the full pipeline: discovery, planning, implementation, testing, and PR creation. Each stage is delegated to a dedicated subagent with scoped tool access. They never interact with you directly.
+2. **Spawned Sessions** - fully autonomous Claude Code sessions that run in your project directories. Each one owns the full pipeline: discovery, planning, implementation, testing, and PR creation. Each stage is delegated to a dedicated subagent with scoped tool access. They never interact with you directly.
 
 ## Pipeline Stages
 
