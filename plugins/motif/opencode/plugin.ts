@@ -55,26 +55,36 @@ export const MotifPlugin: Plugin = async ({ directory, $, client }) => {
             await $`mkdir -p ${motifDir}`
 
             const now = new Date().toISOString()
+            // Get the current commit hash for reliable validator diffs later
+            let baseCommit: string | null = null
+            try {
+              const result = await $`git rev-parse HEAD`.text()
+              baseCommit = result.trim()
+            } catch {
+              // Not a git repo or no commits — validator will fall back to builder output files
+            }
+
             const state = {
               stage: "research",
               complexity: null,
               task: args.task,
               startedAt: now,
               stageStartedAt: now,
+              baseCommit,
               activeAgent: null,
               autoApprove: args.autoApprove ?? false,
               criticChoice: args.criticChoice ?? null,
               tasksCompleted: 0,
               tasksTotal: 0,
               tasksFailed: 0,
-              tasks: {},
+              tasks: [] as Array<{ id: string; description: string; status: string; outputFile: string }>,
             }
 
             await Bun.write(statePath, JSON.stringify(state, null, 2))
             await Bun.write(activePath, "")
             await Bun.write(
               `${motifDir}/context.md`,
-              `# Motif Workflow Context\n**Task:** ${args.task}\n**Started:** ${now}\n`
+              `# Motif Workflow Context\n**Task:** ${args.task}\n**Started:** ${now}\n\n## Research\n\n## Plan\n\n## Tasks\n`
             )
 
             return `Workflow initialized for task: ${args.task}`

@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.3"
+  version: "0.9.4"
 argument-hint: "<task description> [--critic codex|cursor|claude|skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -45,8 +45,9 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
 2. Write `.motif/.active` (empty flag file)
 3. Write `.motif/state.json`:
    ```json
-   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "autoApprove": false, "criticChoice": null, "tasks": [] }
+   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "tasks": [] }
    ```
+   Save `baseCommit` so the validator can diff against the pre-workflow state.
 4. Write `.motif/context.md` with sections in this fixed order:
    ```markdown
    # Motif Workflow Context
@@ -140,7 +141,7 @@ Delegate to the researcher subagent with:
 - **Complexity level**
 - **Prior context** — summarize relevant info from the conversation (files mentioned, what they've tried, constraints stated) so the researcher doesn't re-discover what you already know
 
-The researcher writes to `.motif/researcher-output.md`. Read that file for findings.
+The researcher writes to `.motif/researcher-output.md`. **Wait for it to complete**, then read that file. Do not start planning until research findings are in hand.
 
 **If the output file doesn't exist**, fall back to the subagent's return message. If that's also empty or truncated, research inline.
 
@@ -181,7 +182,7 @@ Build a complete briefing — the critic starts cold:
 5. Tell the critic to read `.motif/context.md`
 6. If `ethos/` exists, tell the critic to read it and flag any plan decisions that conflict with stated principles or non-goals
 
-Spawn the chosen critic. It writes to `.motif/critic-output.md`. Read that file.
+Spawn the chosen critic. **Wait for it to complete** — it writes to `.motif/critic-output.md`. Read that file. Do not proceed to Stage 3 or spawn builders until critic triage and plan approval are done.
 
 **If the critic fails** (no output file, empty/truncated return, CLI error) **and the chosen critic was not Claude**: automatically fall back to the Claude critic. Spawn it with the same briefing. Note the fallback to the user (e.g., "Codex critic failed — falling back to Claude critic").
 
@@ -196,6 +197,8 @@ Replace the `## Plan` section in `.motif/context.md` with the approved plan. Upd
 ---
 
 ## Stage 3: Build
+
+**SEQUENCING: Do NOT spawn any builder agents until Stage 2 is fully complete — critic output has been read, triaged, the plan updated, and the user has approved (or auto-approve is set). Never launch critics and builders in parallel.**
 
 **Runs autonomously after plan approval.**
 
@@ -260,7 +263,7 @@ Spawn the `validator` subagent with:
 1. Original task description
 2. Complexity level
 3. Pointer to `.motif/context.md`
-4. Changed files list — run `git diff --name-only` against the pre-build state, or aggregate from builder output files
+4. Changed files list — run `git diff --name-only <baseCommit>` (from state.json) to get all changes since the workflow started, or aggregate from builder output files
 5. Toolchain commands — extract test/build/lint commands from research findings (in context.md under `## Research`)
 
 It writes to `.motif/validator-output.md`. Read that file.

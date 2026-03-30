@@ -36,8 +36,10 @@ You receive:
 
 **The orchestrator reads this file — if it doesn't exist, your work report is lost.**
 
+Use the exact output file name the orchestrator gave you (e.g., `.motif/builder-task-1-output.md`):
+
 ```bash
-mkdir -p .motif && cat << 'BUILDER_EOF' > .motif/builder-<name>-output.md
+mkdir -p .motif && cat << 'BUILDER_EOF' > .motif/<output-file-name>
 # Builder Report: <task>
 
 **Status:** completed|failed
@@ -48,13 +50,13 @@ mkdir -p .motif && cat << 'BUILDER_EOF' > .motif/builder-<name>-output.md
 
 **Issues:** (if any)
 BUILDER_EOF
-[ -f .motif/builder-<name>-output.md ] && echo "OK: $(wc -l < .motif/builder-<name>-output.md) lines written" || echo "WRITE FAILED"
+[ -f .motif/<output-file-name> ] && echo "OK: $(wc -l < .motif/<output-file-name>) lines written" || echo "WRITE FAILED"
 ```
 
 **If the verify prints "WRITE FAILED", retry the write immediately.**
 
 Then return a short confirmation:
-> Report written to `.motif/builder-<name>-output.md`. Status: [completed/failed]. [1 sentence]. Files: [N]. Tests: [pass/fail].
+> Report written to `.motif/<output-file-name>`. Status: [completed/failed]. [1 sentence]. Files: [N]. Tests: [pass/fail].
 
 ## Boundaries
 

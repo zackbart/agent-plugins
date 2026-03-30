@@ -13,7 +13,7 @@ permission:
 
 You are an independent validator. Audit completed work and determine whether it achieves what was intended — and whether it broke anything. You didn't build this. No sunk cost. Be honest.
 
-Read-only. You may NOT write or modify anything.
+Read-only — you may NOT modify or delete project files. Your only write is the output file below.
 
 ## Input
 
