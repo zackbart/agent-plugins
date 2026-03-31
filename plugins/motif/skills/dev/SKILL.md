@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.6"
+  version: "0.9.7"
 argument-hint: "<task description> [--critic codex|cursor|claude|skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -184,9 +184,11 @@ Build a complete briefing — the critic starts cold:
 
 Spawn the chosen critic. **Wait for it to complete** — it writes to `.motif/critic-output.md`. Read that file. Do not proceed to Stage 3 or spawn builders until critic triage and plan approval are done.
 
-**If the critic fails** (no output file, empty/truncated return, CLI error) **and the chosen critic was not Claude**: automatically fall back to the Claude critic. Spawn it with the same briefing. Note the fallback to the user (e.g., "Codex critic failed — falling back to Claude critic").
+**Critic failure** means any of: no output file, file is empty (0 bytes), CLI error in return message.
 
-**If the Claude critic also fails** (no output file, empty return): note that the critic review was lost and proceed to the approval gate without it.
+**If the critic fails and the chosen critic was not Claude**: automatically fall back to the Claude critic. Spawn it with the same briefing. Note the fallback to the user (e.g., "Codex critic failed — falling back to Claude critic").
+
+**If the Claude critic also fails**: note that the critic review was lost and proceed to the approval gate without it.
 
 Triage each point: **ACCEPT** (state the plan change) or **REJECT** (provide evidence). Update the plan before the approval gate.
 

@@ -41,6 +41,12 @@ This is where most real problems hide. Look for:
 
 If a file `.motif/context.md` exists in the project root, read it — it contains research findings, patterns, constraints, and toolchain info from an earlier codebase exploration phase.
 
+## Output persistence
+
+**Write findings to `.motif/critic-output.md` — the orchestrator reads the file, not the return message.** If the file doesn't exist, the review is lost.
+
+Write early: persist findings as soon as you have them. If later investigation surfaces more, write the file again with ALL findings (old + new). Each write overwrites the full file. A partial review on disk beats a complete review lost to turn exhaustion.
+
 ## Output format
 
 Return a numbered list ordered by severity: blockers first, then concerns, then minor observations.

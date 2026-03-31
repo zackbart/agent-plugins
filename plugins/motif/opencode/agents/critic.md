@@ -52,19 +52,27 @@ If `.motif/context.md` exists, read `## Research` for findings, patterns, and co
 
 ## Output: Write to Disk
 
-**CRITICAL: Write your findings to disk BEFORE doing anything else with them. The orchestrator reads the file, not your return message. If the file doesn't exist, your entire review is lost.**
+**CRITICAL: The orchestrator reads the file, not your return message. If the file doesn't exist, your entire review is lost.**
 
-Write to `.motif/critic-output.md` via Bash. Do this as a **single bash command** — do not split the write and verify into separate tool calls:
+Write your findings to `.motif/critic-output.md` via Bash heredoc. Use a **single-quoted delimiter** — this prevents the shell from interpreting `$`, backticks, or any special characters in your review. Use the exact delimiter shown (do not use this string in your review text):
 
 ```bash
-mkdir -p .motif && cat << 'CRITIC_EOF' > .motif/critic-output.md
+mkdir -p .motif
+cat << '__MOTIF_CRITIC__' > .motif/critic-output.md
 # Critic Review
-...
-CRITIC_EOF
+
+1. **[BLOCKER]** ...
+__MOTIF_CRITIC__
 [ -f .motif/critic-output.md ] && echo "OK: $(wc -l < .motif/critic-output.md) lines written" || echo "WRITE FAILED"
 ```
 
-**If the verify prints "WRITE FAILED", retry the write immediately.** Do not continue without a successful write.
+**Do this as a single Bash command** — do not split the write and verify. If the verify prints "WRITE FAILED", retry immediately.
+
+### Write timing
+
+**Write your findings as soon as you have them — do not wait until you've finished all investigation.** If you have 3 findings after steps 1-2, write them now. If steps 3-4 surface more, write the file again with ALL findings (old + new) — each write overwrites, so every call must contain the complete list. A partial review on disk beats a complete review lost to turn exhaustion.
+
+### Output format
 
 Numbered list ordered by severity. Each item:
 - **Severity**: `[BLOCKER]`, `[CONCERN]`, or `[MINOR]`

@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.6.
+A cross-platform development workflow plugin. Version 0.9.7.
 
 ## Project structure
 
@@ -29,7 +29,8 @@ A cross-platform development workflow plugin. Version 0.9.6.
 - Skills use YAML frontmatter with: `name`, `description`, `allowed-tools`, `argument-hint`, `disable-model-invocation`
 - Subagents use YAML frontmatter with: `name`, `description`, `tools`, `model`, `maxTurns`
 - All subagents default to `model: sonnet` to keep costs down
-- Read-only subagents get `tools: Read, Grep, Glob, Bash` — no Write or Edit
+- Read-only subagents get `tools: Read, Grep, Glob, Bash` — no Edit
+- Critics also get `Write` (scoped to `.motif/critic-output.md`) for reliable output persistence
 - The `builder` and `researcher` subagents also have Context7 MCP tools for external library doc lookups (conditional — gracefully skipped if unavailable)
 - The `builder` subagent has `Write, Edit` access for task execution during Build
 - Subagents cannot use the `Skill` tool — only the orchestrator (main conversation) can

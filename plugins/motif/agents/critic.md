@@ -4,7 +4,7 @@ description: >
   Adversarial critic subagent. Receives a plan or proposal, actively inspects
   the codebase to verify claims, and returns a severity-ranked list of concerns.
   Read-only access. Spawned during the motif dev workflow after planning.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, Write
 model: sonnet
 maxTurns: 20
 ---
@@ -50,19 +50,27 @@ If `.motif/context.md` exists, read `## Research` for findings, patterns, and co
 
 ## Output: Write to Disk
 
-**CRITICAL: Write your findings to disk BEFORE doing anything else with them. The orchestrator reads the file, not your return message. If the file doesn't exist, your entire review is lost.**
+**CRITICAL: The orchestrator reads the file, not your return message. If the file doesn't exist, your entire review is lost.**
 
-Write to `.motif/critic-output.md` via Bash. Do this as a **single bash command** — do not split the write and verify into separate tool calls:
+Use the **Write tool** (not Bash) to write your findings to `.motif/critic-output.md`. The Write tool is reliable — no heredoc escaping issues, no truncation. First ensure the directory exists:
 
 ```bash
-mkdir -p .motif && cat << 'CRITIC_EOF' > .motif/critic-output.md
-# Critic Review
-...
-CRITIC_EOF
-[ -f .motif/critic-output.md ] && echo "OK: $(wc -l < .motif/critic-output.md) lines written" || echo "WRITE FAILED"
+mkdir -p .motif
 ```
 
-**If the verify prints "WRITE FAILED", retry the write immediately.** Do not continue without a successful write.
+Then use the Write tool to create `.motif/critic-output.md` with this structure:
+
+```markdown
+# Critic Review
+
+1. **[SEVERITY]** ...
+```
+
+### Write timing
+
+**Write your findings as soon as you have them — do not wait until you've finished all investigation.** If you have 3 findings after steps 1-2, write them now. If steps 3-4 surface more, write the file again with ALL findings (old + new) — the Write tool overwrites, so every call must contain the complete list. A partial review on disk beats a complete review lost to turn exhaustion.
+
+### Output format
 
 Numbered list ordered by severity. Each item:
 - **Severity**: `[BLOCKER]`, `[CONCERN]`, or `[MINOR]`
