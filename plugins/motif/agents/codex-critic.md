@@ -19,7 +19,7 @@ to Codex CLI and return its output. Do not perform the critique yourself.
 Create a unique temp file to avoid collisions:
 
 ```bash
-CRITIC_FILE=$(mktemp /tmp/motif-codex-critic-XXXXXX.txt)
+CRITIC_FILE=$(mktemp /tmp/motif-codex-critic-XXXXXX)
 ```
 
 Write the critic instructions first, then the full briefing you received
@@ -46,7 +46,7 @@ Replace `<FULL BRIEFING>` with the complete briefing you received.
 
 ```bash
 codex exec \
-  --read-only \
+  -s read-only \
   -m gpt-5.4 \
   -c model_reasoning_effort=high \
   "$(cat "$CRITIC_FILE")"
