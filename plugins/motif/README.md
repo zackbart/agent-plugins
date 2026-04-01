@@ -156,6 +156,7 @@ When installed as a Claude Code plugin, motif includes additional features:
 |---------|-------------|----------|-----------|--------------|
 | 4-stage workflow | Yes | Yes | Yes | Yes |
 | Subagents | researcher, critic, builder, validator | researcher, critic, builder, validator | Inline | Inline |
+| Parallel critics | Yes (2 medium, 3 heavy) | Sequential | No | No |
 | Parallel builders | Yes | Sequential | No | No |
 | Task tracking | Native task tools | .motif/state.json | update_plan | Platform-dependent |
 | State persistence | Yes | Yes | Yes | Yes |

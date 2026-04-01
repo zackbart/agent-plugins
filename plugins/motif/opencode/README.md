@@ -60,6 +60,7 @@ If you place the files somewhere other than the project root, update the `{file:
 
 | Feature | Claude Code | OpenCode |
 |---------|-------------|----------|
+| Parallel critics | Yes (via Agent tool) | Sequential |
 | Parallel builders | Yes (via Agent tool) | Sequential |
 | Task tracking | Native task tools | Via .motif/state.json |
 | Approval gate | AskUserQuestion tool | Conversational pause |
