@@ -13,8 +13,8 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.8"
-argument-hint: "<task description> [--critic codex|cursor|claude|skip] [--auto] | --resume"
+  version: "0.9.9"
+argument-hint: "<task description> [--critic skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
 
@@ -34,7 +34,7 @@ On any new workflow start, delete `.motif/` if it exists from a previous run.
 
 Parse optional flags from the argument string (flags and natural language are equivalent):
 
-- **Critic:** `--critic codex|cursor|claude|skip` or "use claude critic", "skip the critic"
+- **Critic:** `--critic skip` or "skip the critic" (critics run automatically for medium/heavy tasks unless skipped)
 - **Auto-approve:** `--auto` or "auto approve", "just run it", "hands off"
 
 Strip configuration to get the raw task description. Store parsed values in `.motif/state.json`.
@@ -74,17 +74,15 @@ State your assessment. Update state.json with the complexity.
 
 Light tasks always skip the critic.
 
-If `--critic` was provided, use that choice. Otherwise, use `AskUserQuestion` to prompt the user. First, detect which external CLIs are available (check for `codex` and `cursor` in PATH). Then present only the available options:
+Critic count scales with complexity:
+- **Medium**: 2 Claude critics in parallel
+- **Heavy**: 3 Claude critics in parallel
 
-> **Which critic should review the plan?**
-> - **Codex critic (gpt-5.4)** — via Codex CLI *(only shown if codex is installed)*
-> - **Cursor critic (gpt-5.4)** — via Cursor Agent CLI *(only shown if cursor is installed)*
-> - **Claude critic** — built-in subagent
-> - **Skip critic**
+If `--critic skip` was provided, skip all critics regardless of complexity.
 
-This is a configuration step, not a pause point — the only true pause is after Plan.
+Otherwise, critics run automatically — no user prompt needed. Each independent Claude critic run surfaces different findings due to sampling variance.
 
-**Fallback:** If the chosen critic fails for any reason (CLI not found, authentication error, timeout, empty/truncated output), automatically fall back to the Claude critic and note the fallback to the user. Claude critic is the always-available safety net.
+**Fallback:** If a critic fails (empty/truncated return message), its slot is lost — do not retry. The remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate without it.
 
 ---
 
@@ -108,7 +106,7 @@ The only pause point is after Plan.
 >
 > **Tradeoffs:** *(medium/heavy only)* The key alternative considered and why this approach wins (2-3 lines max).
 >
-> **Critic notes:** *(if critic ran)* Accepted/rejected points in 1 line each. Only list items that changed the plan.
+> **Critic notes:** *(if critics ran)* Accepted/rejected points in 1 line each, noting critic agreement where applicable. Only list items that changed the plan.
 >
 > ---
 > - **go** — approve and execute
@@ -174,7 +172,7 @@ Scale depth to complexity. Light = a few sentences. Heavy = alternatives and ris
 
 ### Critic Review (medium/heavy)
 
-Build a complete briefing — the critic starts cold:
+Build a complete briefing — each critic starts cold:
 1. The plan (full approach, files, techniques)
 2. Assumptions
 3. Project context (language, framework, primary dependencies, testing framework, conventions from research)
@@ -182,15 +180,19 @@ Build a complete briefing — the critic starts cold:
 5. Tell the critic to read `.motif/context.md`
 6. If `ethos/` exists, tell the critic to read it and flag any plan decisions that conflict with stated principles or non-goals
 
-Spawn the chosen critic. **Wait for it to complete** — it returns its findings in the return message. Do not proceed to Stage 3 or spawn builders until critic triage and plan approval are done.
+**Spawn all critics in parallel** — use a single message with multiple Agent tool calls. Each gets the same briefing. **Wait for all to complete.** Do not proceed to Stage 3 or spawn builders until all critic outputs have been read, triaged, the plan updated, and the user has approved (or auto-approve is set).
 
-**Critic failure** means any of: empty return message, CLI error in return message.
+**Critic failure** means an empty or truncated return message. Drop failed critics silently — the remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate.
 
-**If the critic fails and the chosen critic was not Claude**: automatically fall back to the Claude critic. Spawn it with the same briefing. Note the fallback to the user (e.g., "Codex critic failed — falling back to Claude critic").
+### Merging Critic Findings
 
-**If the Claude critic also fails**: note that the critic review was lost and proceed to the approval gate without it.
+Collect all critic outputs and merge into a single deduplicated list:
+1. Gather all numbered findings from all critic responses
+2. **Deduplicate** — if multiple critics flag the same issue (same file, same concern), keep the most specific version and note how many critics agreed (e.g., "[CONCERN] (2/3 critics)")
+3. **Sort by severity** — blockers first, then concerns, then minor
+4. Agreement between critics elevates confidence — if 2+ critics independently flag the same issue, weight it higher during triage
 
-Triage each point: **ACCEPT** (state the plan change) or **REJECT** (provide evidence). Update the plan before the approval gate.
+Triage the merged list: **ACCEPT** (state the plan change) or **REJECT** (provide evidence). Update the plan before the approval gate.
 
 ### Post-Plan
 
@@ -200,7 +202,7 @@ Replace the `## Plan` section in `.motif/context.md` with the approved plan. Upd
 
 ## Stage 3: Build
 
-**SEQUENCING: Do NOT spawn any builder agents until Stage 2 is fully complete — critic output has been read, triaged, the plan updated, and the user has approved (or auto-approve is set). Never launch critics and builders in parallel.**
+**SEQUENCING: Do NOT spawn any builder agents until Stage 2 is fully complete — all critic outputs have been read, merged, triaged, the plan updated, and the user has approved (or auto-approve is set). Never launch critics and builders in parallel.**
 
 **Runs autonomously after plan approval.**
 

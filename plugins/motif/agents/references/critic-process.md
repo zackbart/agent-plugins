@@ -1,6 +1,6 @@
 # Critic Review Process
 
-Shared review process used by the Claude critic (critic.md), the Codex CLI critic (codex-critic.md), and the Cursor Agent critic (cursor-critic.md). When updating the critic's methodology, update it here — all critic agents reference this process.
+Shared review process used by the Claude critic (critic.md). When updating the critic's methodology, update it here.
 
 ## Process
 

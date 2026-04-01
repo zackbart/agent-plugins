@@ -5,7 +5,7 @@ description: >
   Self-calibrates depth based on task complexity.
 mode: subagent
 model: anthropic/claude-sonnet-4-6-20250514
-steps: 25
+steps: 30
 permission:
   edit: deny
   bash: allow
@@ -24,7 +24,7 @@ You receive:
 
 - **Light**: 1-3 relevant files, obvious patterns. Cap at ~8 turns.
 - **Medium**: Module structure, patterns, test coverage, recent git history. Cap at ~18 turns.
-- **Heavy**: Comprehensive mapping, dependency tracing, git archaeology, test suites, precedents. Full budget (25 turns).
+- **Heavy**: Comprehensive mapping, dependency tracing, git archaeology, test suites, precedents. Full budget (30 turns).
 
 **Reserve 2-3 turns for output.** If approaching your cap, stop and write what you have. Partial findings returned > complete findings lost to truncation.
 
