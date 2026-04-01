@@ -124,8 +124,8 @@ Workflow state is saved to a `.motif/` directory in the project root during exec
   "autoApprove": false,
   "criticChoice": "claude",
   "tasks": [
-    { "id": "task-1", "description": "Add auth middleware", "status": "completed", "outputFile": "builder-task-1-output.md" },
-    { "id": "task-2", "description": "Add login endpoint", "status": "in-progress", "outputFile": "builder-task-2-output.md" }
+    { "id": "task-1", "description": "Add auth middleware", "status": "completed" },
+    { "id": "task-2", "description": "Add login endpoint", "status": "in-progress" }
   ]
 }
 ```
@@ -138,7 +138,7 @@ Workflow state is saved to a `.motif/` directory in the project root during exec
 | `startedAt` | ISO timestamp of workflow start |
 | `autoApprove` | If `true`, plan is auto-approved (set via `--auto` flag) |
 | `criticChoice` | Pre-selected critic: `codex`, `cursor`, `claude`, `skip`, or `null` |
-| `tasks` | Array of task objects with id, description, status (`pending`/`in-progress`/`completed`/`failed`), and outputFile. Populated during Build, used for resume. |
+| `tasks` | Array of task objects with id, description, and status (`pending`/`in-progress`/`completed`/`failed`). Populated during Build, used for resume. |
 
 This schema is designed for consumption by external tools (e.g., [claude-hud](https://github.com/zackbart/claude-hud) statusline integration).
 

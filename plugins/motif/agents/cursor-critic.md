@@ -74,17 +74,11 @@ echo ">>> Cursor critic finished (exit $CURSOR_EXIT)"
 echo "$CURSOR_OUTPUT"
 ```
 
-### 3. Write output
+### 3. Return output
 
-**The orchestrator reads this file — if it doesn't exist, the review is lost.**
+Return the Cursor output directly in your response, prefixed with `# Critic Review (Cursor Agent / gpt-5.4-medium)`. The orchestrator reads your return message. Do NOT write to `.motif/`.
 
-```bash
-mkdir -p .motif
-```
+If the exit code is non-zero, return the error so the orchestrator can handle it.
 
-Use the **Write tool** to write `.motif/critic-output.md` with the Cursor output, prefixed with `# Critic Review (Cursor Agent / gpt-5.4-medium)`.
-
-If the exit code is non-zero, write the error to the output file so the orchestrator can handle it.
-
-Return a short confirmation under 200 tokens:
-> Critique written to `.motif/critic-output.md`. [1-2 sentence summary of what Cursor found].
+End with a summary line:
+> [1-2 sentence summary of what Cursor found].

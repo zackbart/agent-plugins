@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.7"
+  version: "0.9.8"
 argument-hint: "<task description> [--critic codex|cursor|claude|skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -25,7 +25,7 @@ allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpda
 ## Resume Support
 
 If the argument is `--resume`, check for `.motif/state.json`:
-- If it exists, read it and `.motif/context.md`. For Build-stage resumes, check which builder output files (`.motif/builder-*-output.md`) exist to determine completed tasks. Present the saved state and offer to resume or start fresh (starting fresh deletes `.motif/` first).
+- If it exists, read it and `.motif/context.md`. For Build-stage resumes, check `state.json` task statuses to determine completed tasks. Present the saved state and offer to resume or start fresh (starting fresh deletes `.motif/` first).
 - If it doesn't exist, tell the user there's no workflow to resume.
 
 On any new workflow start, delete `.motif/` if it exists from a previous run.
@@ -141,9 +141,9 @@ Delegate to the researcher subagent with:
 - **Complexity level**
 - **Prior context** — summarize relevant info from the conversation (files mentioned, what they've tried, constraints stated) so the researcher doesn't re-discover what you already know
 
-The researcher writes to `.motif/researcher-output.md`. **Wait for it to complete**, then read that file. Do not start planning until research findings are in hand.
+The researcher returns its findings in its return message. **Wait for it to complete.** Do not start planning until research findings are in hand.
 
-**If the output file doesn't exist**, fall back to the subagent's return message. If that's also empty or truncated, research inline.
+**If the return message is empty or truncated**, research inline.
 
 Without a researcher subagent, research directly.
 
@@ -182,9 +182,9 @@ Build a complete briefing — the critic starts cold:
 5. Tell the critic to read `.motif/context.md`
 6. If `ethos/` exists, tell the critic to read it and flag any plan decisions that conflict with stated principles or non-goals
 
-Spawn the chosen critic. **Wait for it to complete** — it writes to `.motif/critic-output.md`. Read that file. Do not proceed to Stage 3 or spawn builders until critic triage and plan approval are done.
+Spawn the chosen critic. **Wait for it to complete** — it returns its findings in the return message. Do not proceed to Stage 3 or spawn builders until critic triage and plan approval are done.
 
-**Critic failure** means any of: no output file, file is empty (0 bytes), CLI error in return message.
+**Critic failure** means any of: empty return message, CLI error in return message.
 
 **If the critic fails and the chosen critic was not Claude**: automatically fall back to the Claude critic. Spawn it with the same briefing. Note the fallback to the user (e.g., "Codex critic failed — falling back to Claude critic").
 
@@ -211,7 +211,7 @@ Break the plan into tasks. Use task tracking tools (TaskCreate, TaskUpdate).
 - Set dependencies where order matters
 - Include tests alongside the code they verify
 - Replace the `## Tasks` section in `.motif/context.md` with the task list
-- Update state.json `tasks` array: `[{ "id": "task-1", "description": "...", "status": "pending", "outputFile": "builder-task-1-output.md" }, ...]`
+- Update state.json `tasks` array: `[{ "id": "task-1", "description": "...", "status": "pending" }, ...]`
 
 ### Task Execution
 
@@ -231,19 +231,20 @@ Each builder gets:
 - **Task assignment** — ID and description
 - **Complexity level**
 - **Pointer to `.motif/context.md`** — builder reads `## Plan` for approach and `## Research` for conventions
-- **Output file name** — e.g., "write your report to `.motif/builder-task-1-output.md`"
 - **Delta context** — anything task-specific not already in context.md
 
 For light tasks with a small plan, include the relevant plan excerpt directly in the builder briefing to save the builder from parsing context.md.
+
+Each builder returns its report in the return message.
 
 Keep dependent tasks sequential. Light tasks: work through one at a time.
 
 ### Builder Failure Handling
 
-When a builder reports `Status: failed`, read its output file for details:
+When a builder reports `Status: failed` in its return message:
 - **Plan problem** (wrong assumption, missing dependency, design decision needed): stop and present the issue to the user with options: fix the plan, skip the task, or abort.
 - **Routine failure** (test flake, lint issue, small scope miss): attempt a fix inline or spawn a new builder with the failure context.
-- **Turn limit hit** (no output file, empty/truncated return): attempt the task inline.
+- **Turn limit hit** (empty/truncated return): attempt the task inline.
 
 ### When to Stop and Ask
 
@@ -265,12 +266,10 @@ Spawn the `validator` subagent with:
 1. Original task description
 2. Complexity level
 3. Pointer to `.motif/context.md`
-4. Changed files list — run `git diff --name-only <baseCommit>` (from state.json) to get all changes since the workflow started, or aggregate from builder output files
+4. Changed files list — run `git diff --name-only <baseCommit>` (from state.json) to get all changes since the workflow started
 5. Toolchain commands — extract test/build/lint commands from research findings (in context.md under `## Research`)
 
-It writes to `.motif/validator-output.md`. Read that file.
-
-**If the output file doesn't exist**, fall back to the subagent's return message. If that's also empty, run validation inline.
+It returns its report in the return message. **If the return message is empty**, run validation inline.
 
 Present the report. If issues found:
 - **fix** → reinstate `.motif/.active`, go back to Build

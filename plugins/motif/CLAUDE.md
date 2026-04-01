@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.7.
+A cross-platform development workflow plugin. Version 0.9.8.
 
 ## Project structure
 
@@ -30,13 +30,14 @@ A cross-platform development workflow plugin. Version 0.9.7.
 - Subagents use YAML frontmatter with: `name`, `description`, `tools`, `model`, `maxTurns`
 - All subagents default to `model: sonnet` to keep costs down
 - Read-only subagents get `tools: Read, Grep, Glob, Bash` — no Edit
-- Critics also get `Write` (scoped to `.motif/critic-output.md`) for reliable output persistence
+- External critics (codex-critic, cursor-critic) keep `Write` for writing the briefing temp file to pass to the CLI
 - The `builder` and `researcher` subagents also have Context7 MCP tools for external library doc lookups (conditional — gracefully skipped if unavailable)
 - The `builder` subagent has `Write, Edit` access for task execution during Build
 - Subagents cannot use the `Skill` tool — only the orchestrator (main conversation) can
 - The critic review process is defined in `agents/references/critic-process.md` as the source of truth for development — but each critic agent inlines its own copy since the reference file isn't available at runtime in user projects
 - Skills that delegate to subagents should pass a full briefing, not duplicate the subagent's instructions
 - Subagents read `.motif/context.md` for shared workflow context
+- Subagents return output directly in their return message — the orchestrator handles all file persistence
 - The dev workflow supports `--critic` and `--auto` flags (or natural language equivalents) for fully autonomous runs
 - The orchestrator can skip research when it already has sufficient context from the conversation
 - Version is tracked in five places: `plugin.json`, `marketplace.json`, `skills/dev/SKILL.md`, `CLAUDE.md`, `opencode/opencode.json` — keep them in sync

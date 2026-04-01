@@ -61,7 +61,7 @@ export const MotifPlugin: Plugin = async ({ directory, $, client }) => {
               const result = await $`git rev-parse HEAD`.text()
               baseCommit = result.trim()
             } catch {
-              // Not a git repo or no commits — validator will fall back to builder output files
+              // Not a git repo or no commits — validator will use git diff on changed files directly
             }
 
             const state = {
@@ -77,7 +77,7 @@ export const MotifPlugin: Plugin = async ({ directory, $, client }) => {
               tasksCompleted: 0,
               tasksTotal: 0,
               tasksFailed: 0,
-              tasks: [] as Array<{ id: string; description: string; status: string; outputFile: string }>,
+              tasks: [] as Array<{ id: string; description: string; status: string }>,
             }
 
             await Bun.write(statePath, JSON.stringify(state, null, 2))

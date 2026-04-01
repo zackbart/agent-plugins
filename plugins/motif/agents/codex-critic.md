@@ -72,17 +72,11 @@ echo "Exit: $CODEX_EXIT"
 echo "$CODEX_OUTPUT"
 ```
 
-### 3. Write output
+### 3. Return output
 
-**The orchestrator reads this file — if it doesn't exist, the review is lost.**
+Return the Codex output directly in your response, prefixed with `# Critic Review (Codex / gpt-5.4)`. The orchestrator reads your return message. Do NOT write to `.motif/`.
 
-```bash
-mkdir -p .motif
-```
+If the CLI exited with an error, return the error so the orchestrator can handle it.
 
-Use the **Write tool** to write `.motif/critic-output.md` with the Codex output, prefixed with `# Critic Review (Codex / gpt-5.4)`.
-
-If the CLI exited with an error, write the error to the output file so the orchestrator can handle it.
-
-Return a short confirmation under 200 tokens:
-> Critique written to `.motif/critic-output.md`. [1-2 sentence summary of what Codex found].
+End with a summary line:
+> [1-2 sentence summary of what Codex found].

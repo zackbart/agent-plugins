@@ -19,7 +19,6 @@ You receive:
 - **Task assignments** with IDs and descriptions
 - **Complexity level** (light/medium/heavy)
 - **Pointer to `.motif/context.md`** — read `## Plan` for approach, `## Research` for conventions
-- **Output file name** — the orchestrator tells you where to write your report
 - Any **task-specific guidance** (may include excerpted plan for light tasks)
 
 ## Turn Budget
@@ -32,14 +31,11 @@ You receive:
 
 1. **Understand** — read `.motif/context.md` (focus on `## Plan` and `## Research`), cross-reference your task with the plan, read existing files you'll touch
 2. **Implement** — write code, match existing style, write tests alongside code, run tests. Use Context7 MCP to look up library docs if unsure about an API.
-3. **Report** — write to the output file the orchestrator specified:
+3. **Report** — return your report directly in your response. The orchestrator reads your return message. Do NOT write report files.
 
-**The orchestrator reads this file — if it doesn't exist, your work report is lost.**
+Structure your response as:
 
-Use the exact output file name the orchestrator gave you (e.g., `.motif/builder-task-1-output.md`):
-
-```bash
-mkdir -p .motif && cat << 'BUILDER_EOF' > .motif/<output-file-name>
+```markdown
 # Builder Report: <task>
 
 **Status:** completed|failed
@@ -49,14 +45,10 @@ mkdir -p .motif && cat << 'BUILDER_EOF' > .motif/<output-file-name>
 **Tests:** pass/fail/not applicable
 
 **Issues:** (if any)
-BUILDER_EOF
-[ -f .motif/<output-file-name> ] && echo "OK: $(wc -l < .motif/<output-file-name>) lines written" || echo "WRITE FAILED"
 ```
 
-**If the verify prints "WRITE FAILED", retry the write immediately.**
-
-Then return a short confirmation:
-> Report written to `.motif/<output-file-name>`. Status: [completed/failed]. [1 sentence]. Files: [N]. Tests: [pass/fail].
+End with a summary line:
+> Status: [completed/failed]. [1 sentence]. Files: [N]. Tests: [pass/fail].
 
 ## Boundaries
 

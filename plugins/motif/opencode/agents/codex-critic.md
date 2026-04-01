@@ -58,12 +58,9 @@ PLAN BRIEFING:
 __MOTIF_BRIEFING__
 ```
 
-### 2. Run Codex and write output
-
-Run the CLI and write the output file in a **single Bash call** — this keeps the content in a shell variable and avoids re-embedding it in a separate command (which causes escaping issues):
+### 2. Run Codex
 
 ```bash
-mkdir -p .motif
 CODEX_OUTPUT=$(codex exec \
   -s read-only \
   -m gpt-5.4 \
@@ -71,15 +68,15 @@ CODEX_OUTPUT=$(codex exec \
   "$(cat /tmp/motif-critic-briefing.txt)" 2>&1)
 CODEX_EXIT=$?
 rm -f /tmp/motif-critic-briefing.txt
-printf '%s\n' "# Critic Review (Codex / gpt-5.4)" "" "$CODEX_OUTPUT" > .motif/critic-output.md
-[ -f .motif/critic-output.md ] && echo "OK: $(wc -l < .motif/critic-output.md) lines written" || echo "WRITE FAILED"
 echo "--- Exit code: $CODEX_EXIT ---"
 echo "$CODEX_OUTPUT"
 ```
 
-**IMPORTANT: Do NOT split this into separate Bash calls.** The variable `$CODEX_OUTPUT` only exists within the single call. If you run the CLI and write in separate calls, you must re-embed the content as a string literal, which breaks on special characters.
+### 3. Return output
 
-If the exit code is non-zero, the error is already captured in the output file. The orchestrator will handle it.
+Return the Codex output directly in your response, prefixed with `# Critic Review (Codex / gpt-5.4)`. The orchestrator reads your return message. Do NOT write to `.motif/`.
 
-Return a short confirmation under 200 tokens:
-> Critique written to `.motif/critic-output.md`. [1-2 sentence summary of what Codex found].
+If the exit code is non-zero, return the error so the orchestrator can handle it.
+
+End with a summary line:
+> [1-2 sentence summary of what Codex found].
