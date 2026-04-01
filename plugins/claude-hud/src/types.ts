@@ -87,7 +87,6 @@ export interface MotifTask {
   id: string;
   description: string;
   status: 'pending' | 'in-progress' | 'completed' | 'failed';
-  outputFile?: string;
 }
 
 export interface MotifState {
