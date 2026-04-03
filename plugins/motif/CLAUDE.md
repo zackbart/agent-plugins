@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.9.
+A cross-platform development workflow plugin. Version 0.9.10.
 
 ## Project structure
 
@@ -8,9 +8,9 @@ A cross-platform development workflow plugin. Version 0.9.9.
   - `dev/` — 4-stage workflow orchestrator (Research, Plan, Build, Validate)
 - `agents/` — Claude Code subagents (Sonnet)
   - `researcher.md` — codebase exploration (Stage 1: Research) — read-only, has Context7 MCP
-  - `critic.md` — adversarial plan review via Claude (Stage 2: Plan) — read-only
+  - `critic.md` — adversarial plan review via Claude (Stage 2: Plan) — read-only, has Context7 MCP
   - `builder.md` — task execution (Stage 3: Build) — write-capable, has Context7 MCP
-  - `validator.md` — independent build audit (Stage 4: Validate) — read-only
+  - `validator.md` — independent build audit (Stage 4: Validate) — read-only, has Context7 MCP
   - `web-researcher.md` — deep web research for external knowledge (not part of 4-stage flow, spawned on demand)
   - `references/critic-process.md` — shared critic review methodology (single source of truth)
 - `hooks/hooks.json` — SessionStart hook for workflow reminders and interruption detection
@@ -28,7 +28,11 @@ A cross-platform development workflow plugin. Version 0.9.9.
 - Subagents use YAML frontmatter with: `name`, `description`, `tools`, `model`, `maxTurns`
 - All subagents default to `model: sonnet` to keep costs down
 - Read-only subagents get `tools: Read, Grep, Glob, Bash` — no Edit
-- The `builder` and `researcher` subagents also have Context7 MCP tools for external library doc lookups (conditional — gracefully skipped if unavailable)
+- All subagents have Context7 MCP tools for external library doc lookups (conditional — gracefully skipped if unavailable)
+- The `researcher` discovers available skills, plugins, and slash commands in the project and reports them in findings
+- The `critic` uses Context7 to verify library/API assumptions in the plan
+- The `validator` uses Context7 to verify correct API usage in implemented code
+- The `web-researcher` checks Context7 first for library docs before falling back to web search
 - The `builder` subagent has `Write, Edit` access for task execution during Build
 - Subagents cannot use the `Skill` tool — only the orchestrator (main conversation) can
 - The critic review process is defined in `agents/references/critic-process.md` as the source of truth

@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.9"
+  version: "0.9.10"
 argument-hint: "<task description> [--critic skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -138,16 +138,19 @@ Delegate to the researcher subagent with:
 - **Task description**
 - **Complexity level**
 - **Prior context** — summarize relevant info from the conversation (files mentioned, what they've tried, constraints stated) so the researcher doesn't re-discover what you already know
+- **Instruction to discover available skills** — the researcher should scan for installed skills, plugins, and slash commands that might be relevant to the task (skills-lock.json, .claude/skills/, CLAUDE.md references, enabled plugins)
 
 The researcher returns its findings in its return message. **Wait for it to complete.** Do not start planning until research findings are in hand.
 
-**If the return message is empty or truncated**, research inline.
+**Truncation detection:** If the return message is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Found [N] relevant files..."), treat it as truncated. Research inline to fill the gaps — you already have the task context, so focus on the specific files and patterns the researcher was trying to find.
 
 Without a researcher subagent, research directly.
 
 ### Post-Research
 
-Replace the `## Research` section in `.motif/context.md` with findings. Update state.json: set stage to `"plan"` and `stageStartedAt` to the current ISO timestamp.
+Replace the `## Research` section in `.motif/context.md` with findings, including any discovered skills and tools. Update state.json: set stage to `"plan"` and `stageStartedAt` to the current ISO timestamp.
+
+If research discovered relevant skills (e.g., testing skills, linting skills, deployment skills), note them in context so the builder and validator can leverage them.
 
 If research surfaced genuine unknowns (multiple approaches, unclear scope), ask the user before proceeding. Skip for light tasks or clear findings.
 

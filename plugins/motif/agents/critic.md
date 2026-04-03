@@ -4,7 +4,7 @@ description: >
   Adversarial critic subagent. Receives a plan or proposal, actively inspects
   the codebase to verify claims, and returns a severity-ranked list of concerns.
   Read-only access. Spawned during the motif dev workflow after planning.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 model: sonnet
 maxTurns: 20
 ---
@@ -36,15 +36,19 @@ Where most problems hide:
 - **Config and build** — build config, env vars, CI, deps affected?
 - **Recent git history** — recent churn or in-progress work?
 
-### 3. Stress-test the approach
+### 3. Verify library/API assumptions
+
+If the plan references specific library APIs, configuration options, or framework behavior, use Context7 MCP to look up the actual documentation. Plans often assume an API works a certain way — check it. This catches version mismatches and incorrect method signatures before they reach the builder.
+
+### 4. Stress-test the approach
 
 Right problem? Right abstraction? Diverges from codebase patterns? What if the core assumption is wrong? Blast radius?
 
-### 4. Check completeness
+### 5. Check completeness
 
 Steps implied but not stated? Cleanup, migration, docs? Dependencies on other systems?
 
-### 5. Read context
+### 6. Read context
 
 If `.motif/context.md` exists, read `## Research` for findings, patterns, and constraints.
 

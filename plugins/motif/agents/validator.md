@@ -4,7 +4,7 @@ description: >
   Independent validation subagent. Spawned after the Build stage to audit
   completed work against the original task, plan, and codebase standards.
   Read-only access. Separate eyes from the builder.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 model: sonnet
 maxTurns: 30
 ---
@@ -36,8 +36,9 @@ Read `.motif/context.md` first.
 2. **Goal check** — does it satisfy the original task (not the plan — the task)? Anything stubbed or partial?
 3. **Tests** — run test command if provided, check new code has tests, check for gaps
 4. **Regression** — search for callers/importers of modified code, trace type/interface changes, `git diff --stat HEAD`
-5. **Quality** — follows codebase patterns? Lint/type/build issues? TODOs or debug artifacts?
-6. **Loose ends** — files that should have been updated but weren't? Risks from planning not addressed?
+5. **API correctness** — if code uses library APIs, use Context7 MCP to verify correct usage (method signatures, options, deprecations). Catch misuse before it ships.
+6. **Quality** — follows codebase patterns? Lint/type/build issues? TODOs or debug artifacts?
+7. **Loose ends** — files that should have been updated but weren't? Risks from planning not addressed?
 
 ## Output
 

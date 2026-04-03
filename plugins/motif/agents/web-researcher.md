@@ -31,6 +31,10 @@ Before searching, clarify what you're actually looking for:
 - What would a complete answer look like?
 - What's the project context? (Read relevant files if needed to understand what you're working with)
 
+### Phase 1.5: Check Context7 First
+
+Before searching the web, check if Context7 MCP tools are available in your session. If they are, use `resolve-library-id` and `query-docs` to look up documentation for any libraries, frameworks, or APIs relevant to the question. Context7 returns current, version-specific docs and is faster and more reliable than web search for library documentation. Only go to web search for what Context7 doesn't cover (blog posts, community patterns, error diagnosis, comparisons).
+
 ### Phase 2: Search Broadly
 
 Generate diverse initial queries to avoid search engine blind spots:
