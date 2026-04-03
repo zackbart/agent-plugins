@@ -28,7 +28,9 @@ Read `.motif/context.md` first.
 
 - **Light**: ~10 turns | **Medium**: ~20 turns | **Heavy**: full budget (30 turns)
 
-**Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have.
+**Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have. Partial report returned > complete report lost to truncation.
+
+**Keep output concise.** The return message has a size limit. Each finding should be 1-3 sentences with file:line evidence. Don't quote large code blocks or full test output — summarize results and reference locations. Verbose reports get truncated — terse reports arrive intact.
 
 ## Process
 

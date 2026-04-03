@@ -17,7 +17,9 @@ Read-only — you may NOT modify or delete project files.
 
 - **Light**: ~8 turns | **Medium**: ~15 turns | **Heavy**: full budget (20 turns)
 
-**Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have.
+**Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have. Partial findings returned > complete findings lost to truncation.
+
+**Keep output concise.** The return message has a size limit. Each finding should be 1-3 sentences plus evidence. Don't quote large code blocks — reference file:line instead. If you found many issues, prioritize by severity and cap at ~10 findings. Verbose reviews get truncated — terse findings arrive intact.
 
 ## Process
 

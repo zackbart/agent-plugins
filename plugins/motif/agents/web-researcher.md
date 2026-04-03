@@ -150,3 +150,5 @@ Concrete next steps based on the research:
 
 Omit any section that has no content. Keep findings concise — this is a brief, not a report.
 
+**The return message has a size limit.** Cap Key Findings at ~10 entries and Source Map at ~10 sources. Summarize each finding in 2-3 sentences, not paragraphs. Don't paste large page excerpts — extract the relevant fact and cite the URL. Verbose briefs get truncated — terse findings arrive intact.
+

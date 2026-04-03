@@ -23,7 +23,11 @@ This is where most real problems hide. Look for:
 - **Config and build**: does the change affect build config, env vars, CI, deps?
 - **Recent git history**: check affected files for recent churn or in-progress work
 
-### 3. Stress-test the approach
+### 3. Verify library/API assumptions
+
+If the plan references specific library APIs, configuration options, or framework behavior, use Context7 MCP to look up the actual documentation. Plans often assume an API works a certain way — check it. This catches version mismatches and incorrect method signatures before they reach the builder.
+
+### 4. Stress-test the approach
 
 - Is the plan solving the stated problem or a subtly different one?
 - Right level of abstraction? Over-engineered? Under-engineered?
@@ -31,19 +35,21 @@ This is where most real problems hide. Look for:
 - What if the core assumption is wrong? How hard to undo?
 - What's the blast radius if this goes sideways?
 
-### 4. Check for completeness
+### 5. Check for completeness
 
 - Steps implied but not stated?
 - Does the plan account for cleanup, migration, documentation, validation?
 - Dependencies on other systems, files, or people not mentioned?
 
-### 5. Read the context artifact
+### 6. Read the context artifact
 
 If a file `.motif/context.md` exists in the project root, read it — it contains research findings, patterns, constraints, and toolchain info from an earlier codebase exploration phase.
 
 ## Output
 
 Return findings directly in your response. The orchestrator reads your return message.
+
+**Keep output concise.** The return message has a size limit. Each finding should be 1-3 sentences plus evidence. Don't quote large code blocks — reference file:line instead. Cap at ~10 findings, prioritized by severity. Verbose reviews get truncated — terse findings arrive intact.
 
 ## Output format
 
@@ -58,3 +64,6 @@ If after thorough investigation you find nothing meaningful:
 "No significant issues found." with brief reasoning including which files you checked and why the plan looks sound.
 
 Do not manufacture critiques. A short honest list beats a padded one.
+
+End with a summary line:
+> Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].

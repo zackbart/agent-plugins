@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.10"
+  version: "0.9.11"
 argument-hint: "<task description> [--critic skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -185,7 +185,7 @@ Build a complete briefing — each critic starts cold:
 
 **Spawn all critics in parallel** — use a single message with multiple Agent tool calls. Each gets the same briefing. **Wait for all to complete.** Do not proceed to Stage 3 or spawn builders until all critic outputs have been read, triaged, the plan updated, and the user has approved (or auto-approve is set).
 
-**Critic failure** means an empty or truncated return message. Drop failed critics silently — the remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate.
+**Truncation detection:** A critic's return message is truncated if it is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Found [N] blockers..."). Drop failed critics silently — the remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate.
 
 ### Merging Critic Findings
 
@@ -249,7 +249,7 @@ Keep dependent tasks sequential. Light tasks: work through one at a time.
 When a builder reports `Status: failed` in its return message:
 - **Plan problem** (wrong assumption, missing dependency, design decision needed): stop and present the issue to the user with options: fix the plan, skip the task, or abort.
 - **Routine failure** (test flake, lint issue, small scope miss): attempt a fix inline or spawn a new builder with the failure context.
-- **Turn limit hit** (empty/truncated return): attempt the task inline.
+- **Turn limit hit** (empty return, very short under ~100 characters, or ends abruptly without the expected summary line "> Status: [completed/failed]..."): attempt the task inline.
 
 ### When to Stop and Ask
 
@@ -274,7 +274,7 @@ Spawn the `validator` subagent with:
 4. Changed files list — run `git diff --name-only <baseCommit>` (from state.json) to get all changes since the workflow started
 5. Toolchain commands — extract test/build/lint commands from research findings (in context.md under `## Research`)
 
-It returns its report in the return message. **If the return message is empty**, run validation inline.
+It returns its report in the return message. **Truncation detection:** If the return message is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Verdict: [verdict]..."), treat it as truncated and run validation inline.
 
 Present the report. If issues found:
 - **fix** → reinstate `.motif/.active`, go back to Build

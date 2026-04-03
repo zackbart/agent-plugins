@@ -25,7 +25,9 @@ You receive:
 
 - **Light**: ~15 turns | **Medium**: ~25 turns | **Heavy**: full budget (35 turns)
 
-**Reserve 2-3 turns for output.** If approaching your cap, stop implementing, write what you have, and report the task as incomplete.
+**Reserve 2-3 turns for output.** If approaching your cap, stop implementing, write what you have, and report the task as incomplete. Partial report returned > complete report lost to truncation.
+
+**Keep output concise.** The return message has a size limit. List changed files as one line each. Don't include full file contents or large diffs in your report — the orchestrator can read the files directly. Verbose reports get truncated — terse reports arrive intact.
 
 ## Process
 
