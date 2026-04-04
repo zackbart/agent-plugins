@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.11"
+  version: "0.9.12"
 argument-hint: "<task description> [--critic skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -25,7 +25,7 @@ allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpda
 ## Resume Support
 
 If the argument is `--resume`, check for `.motif/state.json`:
-- If it exists, read it and `.motif/context.md`. For Build-stage resumes, check `state.json` task statuses to determine completed tasks. Present the saved state and offer to resume or start fresh (starting fresh deletes `.motif/` first).
+- If it exists, read it and `.motif/context.md`. For Build-stage resumes, compare the `## Tasks` section in `context.md` against `git diff --name-only <baseCommit>` to determine which tasks are already complete. Re-create native tasks (TaskCreate) for incomplete work and mark completed ones immediately. Present the saved state and offer to resume or start fresh (starting fresh deletes `.motif/` first).
 - If it doesn't exist, tell the user there's no workflow to resume.
 
 On any new workflow start, delete `.motif/` if it exists from a previous run.
@@ -45,7 +45,7 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
 2. Write `.motif/.active` (empty flag file)
 3. Write `.motif/state.json`:
    ```json
-   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "tasks": [] }
+   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null }
    ```
    Save `baseCommit` so the validator can diff against the pre-workflow state.
 4. Write `.motif/context.md` with sections in this fixed order:
@@ -55,7 +55,6 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
    **Started:** <timestamp>
    ## Research
    ## Plan
-   ## Tasks
    ```
 
 Suggest adding `.motif/` to `.gitignore` if not already there.
@@ -64,9 +63,9 @@ Suggest adding `.motif/` to `.gitignore` if not already there.
 
 Assess task complexity:
 
-- **Light** (quick fix, config change): minimal research, brief plan, 1-3 tasks
-- **Medium** (feature, moderate refactor): standard research, full plan, 3-8 tasks
-- **Heavy** (large refactor, new system): deep research, thorough plan with tradeoffs, 8+ tasks
+- **Light** (quick fix, config change): minimal research, brief plan
+- **Medium** (feature, moderate refactor): standard research, full plan
+- **Heavy** (large refactor, new system): deep research, thorough plan with tradeoffs
 
 State your assessment. Update state.json with the complexity.
 
@@ -211,20 +210,28 @@ Replace the `## Plan` section in `.motif/context.md` with the approved plan. Upd
 
 ### Task Decomposition
 
-Break the plan into tasks. Use task tracking tools (TaskCreate, TaskUpdate).
+**Do NOT use TaskCreate, TaskUpdate, TaskList, or TaskGet outside of Stage 3: Build. These tools are exclusively for tracking build implementation work.**
 
-- Set dependencies where order matters
-- Include tests alongside the code they verify
-- Replace the `## Tasks` section in `.motif/context.md` with the task list
-- Update state.json `tasks` array: `[{ "id": "task-1", "description": "...", "status": "pending" }, ...]`
+Break the plan into discrete implementation tasks. For each task:
+
+1. **Call TaskCreate** with:
+   - `subject`: imperative action (e.g., "Add validation to UserService.create")
+   - `description`: what to implement and which files to touch
+   - `activeForm`: present-continuous form for the spinner (e.g., "Adding validation to UserService")
+2. **Set dependencies** — after creating all tasks, call TaskUpdate with `addBlockedBy` to link tasks that must run sequentially. Example: if task-2 depends on task-1's exports, call `TaskUpdate({ taskId: "2", addBlockedBy: ["1"] })`.
+3. **Include tests alongside the code they verify** — a task that adds a function should also add its tests, not as a separate task.
+
+After all tasks are created, add a `## Tasks` section to `.motif/context.md` listing each task with its ID and description (this serves as the persistent record for `--resume`).
 
 ### Task Execution
 
-For each task:
-1. Update state.json task status to `"in-progress"`
-2. Implement the change
+For each task (respecting dependency order — never start a task whose `blockedBy` tasks are not yet completed):
+
+1. **Call `TaskUpdate({ taskId, status: "in_progress" })`** before starting work
+2. Implement the change (directly or via a builder subagent)
 3. Run tests if applicable
-4. Update state.json task status to `"completed"` or `"failed"`
+4. **Call `TaskUpdate({ taskId, status: "completed" })`** on success, or `"in_progress"` with a new description on failure (keep it in_progress so you can retry or ask the user)
+5. Update the task's status in the `## Tasks` section of `.motif/context.md` (for resume persistence)
 
 ### Parallel Execution (medium/heavy)
 
@@ -240,7 +247,7 @@ Each builder gets:
 
 For light tasks with a small plan, include the relevant plan excerpt directly in the builder briefing to save the builder from parsing context.md.
 
-Each builder returns its report in the return message.
+Each builder returns its report in the return message. **After each builder returns, the orchestrator must immediately call `TaskUpdate({ taskId, status: "completed" })` or keep it `"in_progress"` if the builder reported failure.** Builders cannot update tasks — only the orchestrator can. Also update the task status in `context.md`.
 
 Keep dependent tasks sequential. Light tasks: work through one at a time.
 

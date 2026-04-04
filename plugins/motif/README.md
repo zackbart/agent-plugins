@@ -116,11 +116,7 @@ Workflow state is saved to a `.motif/` directory in the project root during exec
   "complexity": "medium",
   "startedAt": "2026-03-25T10:00:00Z",
   "autoApprove": false,
-  "criticChoice": "claude",
-  "tasks": [
-    { "id": "task-1", "description": "Add auth middleware", "status": "completed" },
-    { "id": "task-2", "description": "Add login endpoint", "status": "in-progress" }
-  ]
+  "criticChoice": null
 }
 ```
 
@@ -132,7 +128,8 @@ Workflow state is saved to a `.motif/` directory in the project root during exec
 | `startedAt` | ISO timestamp of workflow start |
 | `autoApprove` | If `true`, plan is auto-approved (set via `--auto` flag) |
 | `criticChoice` | Pre-selected critic option: `skip` or `null` (auto) |
-| `tasks` | Array of task objects with id, description, and status (`pending`/`in-progress`/`completed`/`failed`). Populated during Build, used for resume. |
+
+Task tracking uses native task tools (TaskCreate/TaskUpdate) during the Build stage. The task list is persisted in `.motif/context.md` under `## Tasks` for resume support.
 
 This schema is designed for consumption by external tools (e.g., [claude-hud](https://github.com/zackbart/claude-hud) statusline integration).
 
@@ -158,7 +155,7 @@ When installed as a Claude Code plugin, motif includes additional features:
 | Subagents | researcher, critic, builder, validator | researcher, critic, builder, validator | Inline | Inline |
 | Parallel critics | Yes (2 medium, 3 heavy) | Sequential | No | No |
 | Parallel builders | Yes | Sequential | No | No |
-| Task tracking | Native task tools | .motif/state.json | update_plan | Platform-dependent |
+| Task tracking | Native task tools + context.md | .motif/state.json | update_plan | Platform-dependent |
 | State persistence | Yes | Yes | Yes | Yes |
 | Interruption detection | SessionStart hook | Plugin event handler | Manual | Manual |
 | Distribution | Plugin marketplace | npx skills + config | Git clone | npx skills |
