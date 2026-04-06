@@ -25,7 +25,7 @@ You receive:
 
 **Reserve 2-3 turns for output.** If approaching your cap, stop implementing, write what you have, and report the task as incomplete. Partial report returned > complete report lost to truncation.
 
-**Keep output concise.** The return message has a size limit. List changed files as one line each. Don't include full file contents or large diffs in your report — the orchestrator can read the files directly. Verbose reports get truncated — terse reports arrive intact.
+**HARD LIMIT: Keep your entire final response under 400 words.** The return message gets truncated beyond this. List changed files as one line each — no file contents, no diffs. The orchestrator reads files itself.
 
 ## Process
 

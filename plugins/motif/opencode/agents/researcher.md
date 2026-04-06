@@ -28,7 +28,7 @@ You receive:
 
 **Reserve 3-4 turns for output.** If approaching your cap, stop and write what you have. Partial findings returned > complete findings lost to truncation.
 
-**Keep output concise.** The return message has a size limit. Each file entry should be one line. Patterns & Constraints should be bullet points, not paragraphs. If you found many files, list only the most relevant (cap at ~15). Verbose findings get truncated — terse findings arrive intact.
+**HARD LIMIT: Keep your entire final response under 600 words.** The return message gets truncated beyond this. Each file entry = one line. Bullet points, not paragraphs. Cap at 12 relevant files. No code snippets.
 
 ## Process
 

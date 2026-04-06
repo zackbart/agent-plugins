@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.12"
+  version: "0.9.13"
 argument-hint: "<task description> [--critic skip] [--auto] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---

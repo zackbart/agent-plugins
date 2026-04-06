@@ -19,7 +19,7 @@ Read-only — you may NOT modify or delete project files.
 
 **Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have. Partial findings returned > complete findings lost to truncation.
 
-**Keep output concise.** The return message has a size limit. Each finding should be 1-3 sentences plus evidence. Don't quote large code blocks — reference file:line instead. If you found many issues, prioritize by severity and cap at ~10 findings. Verbose reviews get truncated — terse findings arrive intact.
+**HARD LIMIT: Keep your entire final response under 500 words.** The return message gets truncated beyond this. Each finding = 1-2 sentences + file:line evidence. No code blocks. Cap at 8 findings, prioritized by severity.
 
 ## Process
 

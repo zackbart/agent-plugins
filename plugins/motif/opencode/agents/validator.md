@@ -32,7 +32,7 @@ Read `.motif/context.md` first.
 
 **Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have. Partial report returned > complete report lost to truncation.
 
-**Keep output concise.** The return message has a size limit. Each finding should be 1-3 sentences with file:line evidence. Don't quote large code blocks or full test output — summarize results and reference locations. Verbose reports get truncated — terse reports arrive intact.
+**HARD LIMIT: Keep your entire final response under 500 words.** The return message gets truncated beyond this. No code blocks, no test output, no full diffs. Reference file:line locations — the orchestrator can read files itself. Every finding = 1-2 sentences max. Cap at 8 findings.
 
 ## Process
 
