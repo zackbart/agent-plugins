@@ -42,11 +42,24 @@ npx skills add zackbart/motif
 
 Then merge the config from `opencode/opencode.json` into your project's `opencode.json` (agent definitions, /dev command, plugin, MCP). See [`opencode/README.md`](opencode/README.md) for detailed setup.
 
-### Codex CLI
+### Codex CLI (full plugin)
+
+Motif ships a Codex plugin manifest at `.codex-plugin/plugin.json`. From a clone of this repo, the repo-scoped marketplace is already registered at `.agents/plugins/marketplace.json`:
 
 ```bash
-git clone https://github.com/zackbart/motif.git ~/.agents/skills/motif
+codex plugin install motif
 ```
+
+For a personal install, symlink the marketplace into `~/.agents/plugins/`:
+
+```bash
+git clone https://github.com/zackbart/agent-plugins.git ~/src/agent-plugins
+mkdir -p ~/.agents/plugins
+ln -s ~/src/agent-plugins/.agents/plugins/marketplace.json ~/.agents/plugins/marketplace.json
+codex plugin install motif
+```
+
+See [`codex/README.md`](codex/README.md) for the full setup, optional Context7 MCP wiring, and the limitations table vs Claude Code.
 
 ## Usage
 
@@ -157,8 +170,8 @@ When installed as a Claude Code plugin, motif includes additional features:
 | Parallel builders | Yes | Sequential | No | No |
 | Task tracking | Native task tools + context.md | .motif/state.json | update_plan | Platform-dependent |
 | State persistence | Yes | Yes | Yes | Yes |
-| Interruption detection | SessionStart hook | Plugin event handler | Manual | Manual |
-| Distribution | Plugin marketplace | npx skills + config | Git clone | npx skills |
+| Interruption detection | SessionStart hook | Plugin event handler | AGENTS.md priming | Manual |
+| Distribution | Plugin marketplace | npx skills + config | Codex plugin marketplace | npx skills |
 
 ## Project Structure
 
@@ -175,9 +188,12 @@ opencode/                # OpenCode configuration
   opencode.json          # Agent definitions, /dev command, MCP config
   plugin.ts              # State management tools + workflow detection
   agents/                # OpenCode-format subagent prompts
+codex/                   # Codex CLI docs
+  README.md              # Codex install + limitations vs Claude Code
 hooks/                   # Session lifecycle hooks (Claude Code)
 AGENTS.md                # Session priming (Codex CLI)
-.claude-plugin/          # Plugin manifest and marketplace config
+.claude-plugin/          # Claude Code plugin manifest
+.codex-plugin/           # Codex plugin manifest (points at the same skills/)
 ```
 
 ## License

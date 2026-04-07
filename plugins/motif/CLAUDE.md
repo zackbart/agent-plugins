@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.13.
+A cross-platform development workflow plugin. Version 0.9.14.
 
 ## Project structure
 
@@ -15,7 +15,9 @@ A cross-platform development workflow plugin. Version 0.9.13.
   - `references/critic-process.md` — shared critic review methodology (single source of truth)
 - `hooks/hooks.json` — SessionStart hook for workflow reminders and interruption detection
 - `AGENTS.md` — Codex CLI session priming (mirrors CLAUDE.md intent)
-- `.claude-plugin/` — plugin.json and marketplace.json manifests
+- `.claude-plugin/` — plugin.json and marketplace.json manifests for Claude Code
+- `.codex-plugin/plugin.json` — Codex CLI plugin manifest (points at the same `skills/` dir)
+- `codex/README.md` — setup instructions and limitations table for Codex users
 - `opencode/` — OpenCode configuration (agents, plugin, commands)
   - `opencode.json` — agent definitions, /dev command, MCP config (template for users)
   - `plugin.ts` — state management tools + interrupted workflow detection
@@ -42,13 +44,14 @@ A cross-platform development workflow plugin. Version 0.9.13.
 - The dev workflow spawns multiple Claude critics in parallel based on complexity: 2 for medium, 3 for heavy
 - The dev workflow supports `--critic` and `--auto` flags (or natural language equivalents) for fully autonomous runs
 - The orchestrator can skip research when it already has sufficient context from the conversation
-- Version is tracked in five places: `plugin.json`, `marketplace.json`, `skills/dev/SKILL.md`, `CLAUDE.md`, `opencode/opencode.json` — keep them in sync
+- Version is tracked in six places: `.claude-plugin/plugin.json`, root `marketplace.json`, `skills/dev/SKILL.md`, `CLAUDE.md`, `opencode/opencode.json`, `.codex-plugin/plugin.json` — keep them in sync
 
 ## When editing this project
 
-- Bump version in all five locations when making significant changes
+- Bump version in all six locations when making significant changes
 - Keep AGENTS.md in sync with CLAUDE.md for Codex CLI compatibility
 - Skills should be cross-platform — don't assume Claude Code-specific features in skill instructions
+- The Codex plugin shares the same `skills/` directory as Claude Code — Codex packaging is just a manifest at `.codex-plugin/plugin.json`, no parallel skill copy
 - Claude Code subagents live in `agents/`, OpenCode subagents live in `opencode/agents/` — keep prompt content in sync when editing agent behavior
 - Test skill discoverability with `npx skills add --list /path/to/motif`
 - README.md project structure section should reflect actual directory layout

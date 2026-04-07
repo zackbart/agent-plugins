@@ -1,0 +1,20 @@
+{
+  "name": "agent-plugins",
+  "interface": {
+    "displayName": "Zack's Agent Plugins"
+  },
+  "plugins": [
+    {
+      "name": "motif",
+      "source": {
+        "source": "local",
+        "path": "./plugins/motif"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Development"
+    }
+  ]
+}

@@ -4,9 +4,10 @@ This is a Claude Code plugin marketplace. Each plugin is independent and lives i
 
 ## Structure
 
-- `.claude-plugin/marketplace.json` — marketplace manifest, registers all plugins
+- `.claude-plugin/marketplace.json` — Claude Code marketplace manifest, registers all plugins
+- `.agents/plugins/marketplace.json` — Codex CLI marketplace manifest (registers motif only)
 - `plugins/claude-hud/` — statusline HUD (TypeScript, needs `npm run build`)
-- `plugins/motif/` — 4-stage dev workflow (Research, Plan, Build, Validate)
+- `plugins/motif/` — 4-stage dev workflow (Research, Plan, Build, Validate); also ships a `.codex-plugin/plugin.json` for Codex CLI
 - `plugins/helm/` — autonomous session orchestrator (discovery through PR)
 
 ## Working on a plugin

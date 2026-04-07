@@ -1,0 +1,25 @@
+{
+  "name": "motif",
+  "version": "0.9.14",
+  "description": "Personal development workflow plugin. Encodes a 4-stage process (Research, Plan, Build, Validate) for any codebase.",
+  "author": {
+    "name": "Zack Bart"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/zackbart/agent-plugins",
+  "keywords": ["workflow", "development", "productivity"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Motif",
+    "shortDescription": "4-stage development workflow",
+    "longDescription": "Motif encodes a rigorous 4-stage development process: Research, Plan, Build, Validate. The plan is the single approval gate — once approved, build and validate run autonomously. Works on any Agent Skills runtime.",
+    "developerName": "Zack Bart",
+    "category": "Development",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Use motif to add a feature.",
+      "Use motif to fix a bug.",
+      "Use motif to refactor."
+    ]
+  }
+}
