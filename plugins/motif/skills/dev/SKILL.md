@@ -13,8 +13,8 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.14"
-argument-hint: "<task description> [--critic skip] [--auto] | --resume"
+  version: "0.9.16"
+argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
 
@@ -36,6 +36,7 @@ Parse optional flags from the argument string (flags and natural language are eq
 
 - **Critic:** `--critic skip` or "skip the critic" (critics run automatically for medium/heavy tasks unless skipped)
 - **Auto-approve:** `--auto` or "auto approve", "just run it", "hands off"
+- **Codex second opinion:** `--codex-critic` / "use codex to critique", "gpt second opinion" (force on); `--no-codex-critic` / "skip codex", "no second opinion" (force off). Natural language always overrides the complexity default below.
 
 Strip configuration to get the raw task description. Store parsed values in `.motif/state.json`.
 
@@ -45,7 +46,7 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
 2. Write `.motif/.active` (empty flag file)
 3. Write `.motif/state.json`:
    ```json
-   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null }
+   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "codexCritic": null }
    ```
    Save `baseCommit` so the validator can diff against the pre-workflow state.
 4. Write `.motif/context.md` with sections in this fixed order:
@@ -82,6 +83,20 @@ If `--critic skip` was provided, skip all critics regardless of complexity.
 Otherwise, critics run automatically — no user prompt needed. Each independent Claude critic run surfaces different findings due to sampling variance.
 
 **Fallback:** If a critic fails (empty/truncated return message), its slot is lost — do not retry. The remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate without it.
+
+### Codex Second Opinion
+
+After Claude critics merge (or, if Claude critics are skipped on a light task, after the plan is drafted), a second-opinion pass via the Codex CLI can catch what Claude missed or disagrees with — a cross-model signal.
+
+Resolve whether to run it using this precedence (highest wins — apply in order and stop at first match):
+1. `--critic skip` (or "skip the critic") — skip codex along with all other critics
+2. `--no-codex-critic` (or "skip codex", "no second opinion") — force off. Wins over `--codex-critic` if both are somehow present; explicit off always beats explicit on.
+3. `--codex-critic` (or "use codex to critique", "gpt second opinion") — force on. Runs even on light tasks when explicitly requested.
+4. Complexity default — **heavy: on**, medium: off, light: off
+
+Persist the resolved decision as `codexCritic: "on" | "off"` in `state.json`.
+
+See "Codex Second Opinion Pass" below for invocation and merge behavior.
 
 ---
 
@@ -194,7 +209,44 @@ Collect all critic outputs and merge into a single deduplicated list:
 3. **Sort by severity** — blockers first, then concerns, then minor
 4. Agreement between critics elevates confidence — if 2+ critics independently flag the same issue, weight it higher during triage
 
-Triage the merged list: **ACCEPT** (state the plan change) or **REJECT** (provide evidence). Update the plan before the approval gate.
+Triage the merged list: **ACCEPT** (state the plan change) or **REJECT** (provide evidence).
+
+### Codex Second Opinion Pass
+
+If `codexCritic` is `"on"` in `state.json`, run a single sequential pass via the Codex CLI after Claude critics merge (or, for light tasks where Claude critics were skipped, run it directly after the plan is drafted). Skip this subsection entirely when `codexCritic` is `"off"`.
+
+Invoke `codex` non-interactively with the briefing piped on stdin. Capture stdout as the findings; discard stderr (Codex prints a session banner, input echo, and reasoning trace to stderr — only stdout holds the critic output):
+
+```bash
+printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null
+```
+
+**Wall-clock bound:** if the call does not return within ~5 minutes, kill the subprocess and treat it as a truncation/skip. When running through a tool harness that supports a timeout parameter, set it to 300000ms. On systems that have `timeout`/`gtimeout` on PATH, wrap the command as `timeout 300 bash -c '...'`.
+
+Do NOT pass `-m` or any model/reasoning flags — honor whatever the user's `~/.codex/config.toml` already has configured.
+
+**Briefing contents** — build a complete cold-start briefing:
+1. The plan (full: approach, files, techniques) as-is after Claude triage
+2. Assumptions
+3. Project context (language, framework, primary dependencies, testing framework, conventions from research)
+4. File paths the plan touches
+5. The merged Claude findings (or "Claude critics were skipped for this task" if light), framed as: *"Claude's critics found these. What did they miss? What do you disagree with? What plan-level concerns remain?"*
+6. Tell Codex to read `.motif/context.md` itself
+7. If `ethos/` exists, tell Codex to read it and flag any plan decisions that conflict with stated principles or non-goals
+8. **Output contract:** tell Codex to follow `agents/critic.md` exactly — it is the single source of truth for critic behavior. This includes: the 500-word hard cap, 8-finding cap, severity ordering (blockers → concerns → minor), no code blocks, file:line evidence required, the "No significant issues found" fallback when appropriate, and the required summary line `> Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].`
+
+**Merging Codex findings** — fold Codex's findings into the existing merged list, deduplicate across all sources (Claude + Codex), and re-triage. If a Codex finding agrees with a Claude finding on the same file/concern, elevate confidence and mark with source count (e.g., `[BLOCKER] (Claude 2/2 + Codex)`). Update the plan based on the re-triaged list before the approval gate.
+
+**Failure handling — NEVER blocks approval:**
+- `codex` not on PATH (exit 127 or `command not found`) → log "Codex critic skipped: not installed", continue to Post-Plan
+- Non-zero exit → log "Codex critic skipped: exit <code>", continue
+- Empty stdout, very short (under ~100 characters), or missing the `> Found [N]...` summary line → log "Codex critic skipped: truncated/incomplete", continue
+- Wall-clock timeout (~5 min) → kill and log "Codex critic skipped: timeout", continue
+- The Codex pass is additive insurance, not a gate. Any failure mode silently degrades to Claude-only critic review.
+
+**Recursive case:** If the motif skill itself is running inside a Codex CLI session, shelling out to `codex exec` spawns a fresh subprocess with its own context and session — this is expected and safe.
+
+Update the plan before the approval gate.
 
 ### Post-Plan
 

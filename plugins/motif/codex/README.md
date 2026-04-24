@@ -66,6 +66,24 @@ Motif's planner and validator gain accuracy when Context7 is available for libra
 
 The dev skill detects Context7 at runtime and uses it when present.
 
+## Codex second-opinion critic
+
+The dev skill can run a sequential second-opinion pass via `codex exec` after the Claude critic merge. On by default for heavy tasks; off by default for medium and light. Use `--codex-critic` or "use codex to critique" to force it on (runs even on light tasks when explicitly requested). Use `--no-codex-critic` or "skip codex" to force it off. `--critic skip` skips it along with every other critic.
+
+**Invocation:**
+
+```bash
+printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null
+```
+
+Stdout carries the critic findings. Stderr is the Codex session banner, input echo, and reasoning trace — discard it, it is not part of the critic output. The skill does NOT pass `-m` or reasoning flags — whatever model and reasoning effort is configured in `~/.codex/config.toml` is used as-is.
+
+The briefing instructs Codex to follow `agents/critic.md` as the single source of truth for its output contract (500-word cap, 8-finding cap, severity ordering, file:line evidence, required `> Found [N]...` summary line).
+
+**Timeout:** the call is bounded at ~5 minutes wall-clock; on timeout, the subprocess is killed and the pass is treated as a skip.
+
+**Recursive case:** when motif itself is running inside a Codex CLI session and invokes this pass, `codex exec` spawns a fresh subprocess with its own context and session. This is expected and safe. Failures (codex missing, non-zero exit, timeout, empty or truncated output) are logged and skipped — the second opinion never blocks approval.
+
 ## Known limitations vs Claude Code
 
 | Feature | Claude Code | Codex |

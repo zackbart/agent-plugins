@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.14.
+A cross-platform development workflow plugin. Version 0.9.16.
 
 ## Project structure
 
@@ -42,6 +42,7 @@ A cross-platform development workflow plugin. Version 0.9.14.
 - Subagents read `.motif/context.md` for shared workflow context
 - Subagents return output directly in their return message — the orchestrator handles all file persistence
 - The dev workflow spawns multiple Claude critics in parallel based on complexity: 2 for medium, 3 for heavy
+- The dev workflow supports a sequential codex second-opinion pass after Claude critics merge — default on for heavy, off for medium and light; explicit `--codex-critic` / "use codex to critique" forces on (even on light tasks), `--no-codex-critic` / "skip codex" forces off, and `--critic skip` skips it along with every other critic. Invokes `printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null` — stdout carries the findings, stderr is a session banner and must be discarded. The briefing instructs Codex to follow `agents/critic.md` exactly (the single source of truth for critic contract). Bounded at ~5 min wall-clock; any failure mode (missing binary, non-zero exit, timeout, truncated output) logs a skip and continues — never blocks approval. Respects the user's `~/.codex/config.toml` for model and reasoning; no `-m` flag is passed.
 - The dev workflow supports `--critic` and `--auto` flags (or natural language equivalents) for fully autonomous runs
 - The orchestrator can skip research when it already has sufficient context from the conversation
 - Version is tracked in six places: `.claude-plugin/plugin.json`, root `marketplace.json`, `skills/dev/SKILL.md`, `CLAUDE.md`, `opencode/opencode.json`, `.codex-plugin/plugin.json` — keep them in sync
