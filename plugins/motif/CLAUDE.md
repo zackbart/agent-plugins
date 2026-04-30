@@ -1,11 +1,12 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.16.
+A cross-platform development workflow plugin. Version 0.9.17.
 
 ## Project structure
 
 - `skills/` — universal skills (work via npx skills and as slash commands)
   - `dev/` — 4-stage workflow orchestrator (Research, Plan, Build, Validate)
+  - `ask-codex/` — consult the Codex CLI for a second opinion on any question (Claude Code only)
 - `agents/` — Claude Code subagents (Sonnet)
   - `researcher.md` — codebase exploration (Stage 1: Research) — read-only, has Context7 MCP
   - `critic.md` — adversarial plan review via Claude (Stage 2: Plan) — read-only, has Context7 MCP
@@ -44,6 +45,7 @@ A cross-platform development workflow plugin. Version 0.9.16.
 - The dev workflow spawns multiple Claude critics in parallel based on complexity: 2 for medium, 3 for heavy
 - The dev workflow supports a sequential codex second-opinion pass after Claude critics merge — default on for heavy, off for medium and light; explicit `--codex-critic` / "use codex to critique" forces on (even on light tasks), `--no-codex-critic` / "skip codex" forces off, and `--critic skip` skips it along with every other critic. Invokes `printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null` — stdout carries the findings, stderr is a session banner and must be discarded. The briefing instructs Codex to follow `agents/critic.md` exactly (the single source of truth for critic contract). Bounded at ~5 min wall-clock; any failure mode (missing binary, non-zero exit, timeout, truncated output) logs a skip and continues — never blocks approval. Respects the user's `~/.codex/config.toml` for model and reasoning; no `-m` flag is passed.
 - The dev workflow supports `--critic` and `--auto` flags (or natural language equivalents) for fully autonomous runs
+- The `ask-codex` skill exposes the codex consultation pattern as a standalone capability: smart-default cold-start briefing (question + conversation summary + git diff + file/context pointers), same `codex exec -s read-only` invocation, free-form output (no critic.md contract), `**Codex says:**` verbatim reply, fire-and-forget (no persistence). DIVERGES from Stage 2 by surfacing failures clearly instead of silent-skip — the user explicitly asked, so silent skip would be wrong. Claude Code only for v1; not exposed via `.codex-plugin/plugin.json`.
 - The orchestrator can skip research when it already has sufficient context from the conversation
 - Version is tracked in six places: `.claude-plugin/plugin.json`, root `marketplace.json`, `skills/dev/SKILL.md`, `CLAUDE.md`, `opencode/opencode.json`, `.codex-plugin/plugin.json` — keep them in sync
 
