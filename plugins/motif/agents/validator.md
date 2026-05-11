@@ -5,7 +5,7 @@ description: >
   completed work against the original task, plan, and codebase standards.
   Read-only access. Separate eyes from the builder.
 tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
-model: sonnet
+model: opus
 maxTurns: 30
 ---
 

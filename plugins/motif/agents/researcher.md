@@ -5,7 +5,7 @@ description: >
   structured research before planning. Read-only — never modifies files.
   Self-calibrates depth based on task complexity.
 tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
-model: sonnet
+model: opus
 maxTurns: 30
 ---
 

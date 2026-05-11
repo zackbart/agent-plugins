@@ -5,7 +5,7 @@ description: >
   specific implementation tasks in parallel. Receives task assignments and
   a shared context artifact. Reports back with results and issues.
 tools: Read, Grep, Glob, Bash, Write, Edit, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
-model: sonnet
+model: opus
 maxTurns: 35
 ---
 

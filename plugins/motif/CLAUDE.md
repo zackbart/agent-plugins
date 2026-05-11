@@ -1,13 +1,13 @@
 # Motif — Claude Code Plugin
 
-A cross-platform development workflow plugin. Version 0.9.17.
+A cross-platform development workflow plugin. Version 0.9.18.
 
 ## Project structure
 
 - `skills/` — universal skills (work via npx skills and as slash commands)
   - `dev/` — 4-stage workflow orchestrator (Research, Plan, Build, Validate)
   - `ask-codex/` — consult the Codex CLI for a second opinion on any question (Claude Code only)
-- `agents/` — Claude Code subagents (Sonnet)
+- `agents/` — Claude Code subagents (Opus)
   - `researcher.md` — codebase exploration (Stage 1: Research) — read-only, has Context7 MCP
   - `critic.md` — adversarial plan review via Claude (Stage 2: Plan) — read-only, has Context7 MCP
   - `builder.md` — task execution (Stage 3: Build) — write-capable, has Context7 MCP
@@ -29,7 +29,7 @@ A cross-platform development workflow plugin. Version 0.9.17.
 
 - Skills use YAML frontmatter with: `name`, `description`, `allowed-tools`, `argument-hint`, `disable-model-invocation`
 - Subagents use YAML frontmatter with: `name`, `description`, `tools`, `model`, `maxTurns`
-- All subagents default to `model: sonnet` to keep costs down
+- All subagents default to `model: opus` (web-researcher uses `inherit`)
 - Read-only subagents get `tools: Read, Grep, Glob, Bash` — no Edit
 - All subagents have Context7 MCP tools for external library doc lookups (conditional — gracefully skipped if unavailable)
 - The `researcher` discovers available skills, plugins, and slash commands in the project and reports them in findings

@@ -5,7 +5,7 @@ description: >
   the codebase to verify claims, and returns a severity-ranked list of concerns.
   Read-only access. Spawned during the motif dev workflow after planning.
 tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
-model: sonnet
+model: opus
 maxTurns: 20
 ---
 

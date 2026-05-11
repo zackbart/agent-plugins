@@ -13,8 +13,8 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.17"
-argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] | --resume"
+  version: "0.9.18"
+argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
 
@@ -37,6 +37,7 @@ Parse optional flags from the argument string (flags and natural language are eq
 - **Critic:** `--critic skip` or "skip the critic" (critics run automatically for medium/heavy tasks unless skipped)
 - **Auto-approve:** `--auto` or "auto approve", "just run it", "hands off"
 - **Codex second opinion:** `--codex-critic` / "use codex to critique", "gpt second opinion" (force on); `--no-codex-critic` / "skip codex", "no second opinion" (force off). Natural language always overrides the complexity default below.
+- **Subagent model override:** `--model opus|sonnet|haiku` or natural language like "use sonnet", "run with sonnet", "with opus", "on haiku". Overrides the per-agent frontmatter for every spawned subagent (researcher, critic, builder, validator, web-researcher) in this workflow only. If omitted, each agent uses its frontmatter default (currently `opus` for all four core agents; `inherit` for `web-researcher`).
 
 Strip configuration to get the raw task description. Store parsed values in `.motif/state.json`.
 
@@ -46,7 +47,7 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
 2. Write `.motif/.active` (empty flag file)
 3. Write `.motif/state.json`:
    ```json
-   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "codexCritic": null }
+   { "stage": "research", "task": "<description>", "complexity": null, "startedAt": "<ISO>", "stageStartedAt": "<ISO>", "baseCommit": "<git rev-parse HEAD>", "autoApprove": false, "criticChoice": null, "codexCritic": null, "subagentModel": null }
    ```
    Save `baseCommit` so the validator can diff against the pre-workflow state.
 4. Write `.motif/context.md` with sections in this fixed order:
@@ -59,6 +60,14 @@ Strip configuration to get the raw task description. Store parsed values in `.mo
    ```
 
 Suggest adding `.motif/` to `.gitignore` if not already there.
+
+## Subagent Model Override
+
+If `subagentModel` in `state.json` is set (e.g., `"sonnet"`), pass `model: "<value>"` to **every** Agent tool call in this workflow — researcher, critic (each parallel one), builder (each parallel one), validator, and any ad-hoc web-researcher spawn. This overrides the agent's frontmatter model for the duration of the run.
+
+If `subagentModel` is `null`, omit the `model` parameter and each agent uses its frontmatter default.
+
+This setting affects subagent spawns only. The orchestrator (this skill's main conversation) keeps running on whatever model the user is in. The Codex second-opinion pass is unaffected — Codex honors `~/.codex/config.toml`.
 
 ## Complexity Assessment
 
