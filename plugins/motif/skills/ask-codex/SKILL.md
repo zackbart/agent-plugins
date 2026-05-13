@@ -35,7 +35,7 @@ Codex starts with no context. Assemble a single string `$BRIEFING` containing th
 2. **One-paragraph conversation summary** — what's been discussed, what's been tried, what the current working theory is. Write this in third person ("Claude has been investigating..."). Skip if the conversation is empty or the question is fully self-contained.
 3. **Git diff** — run `git diff` (and `git diff --staged` if it has content). Include the output if it's relevant to the question. Skip if empty, or if the question is clearly unrelated to working-tree changes.
 4. **File pointers** — list specific files Claude wants Codex to consider, with one-line descriptions. Do not inline file contents; let Codex read them.
-5. **Project context pointers** — instruct Codex to read `.motif/context.md` if it exists, `ethos/` if it exists, and `CLAUDE.md` / `AGENTS.md` if they exist at the repo root.
+5. **Project context pointers** — instruct Codex to read `.motif/context.md` if it exists, `ethos.md` if it exists (or the legacy `ethos/` directory as a fallback), and `CLAUDE.md` / `AGENTS.md` if they exist at the repo root.
 6. **Tone nudge** — close with: *"Be rigorous and specific for technical questions; conversational for opinion questions. Reply in whatever format best answers the question — no required structure."*
 
 Keep the briefing focused. A bloated briefing buries the question.

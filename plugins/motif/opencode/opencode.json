@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "_motifVersion": "0.9.18",
+  "_motifVersion": "0.9.19",
   "agent": {
     "researcher": {
       "description": "Codebase exploration agent for the motif workflow (Stage 1: Research)",

@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.18"
+  version: "0.9.19"
 argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -185,7 +185,7 @@ Produce an implementation plan from research findings.
 
 ### Ethos Check
 
-Before planning, check if an `ethos/` directory exists in the project root. If it does, read `ethos/vision.md`, `ethos/principles.md`, and `ethos/non-goals.md`. Use these to inform tradeoff analysis, approach selection, and scope decisions in the plan. Don't mention ethos if the directory doesn't exist.
+Before planning, check the project root for ethos. Prefer `ethos.md` (current format — a single file). If it doesn't exist, fall back to a legacy `ethos/` directory and read `ethos/vision.md`, `ethos/principles.md`, and `ethos/non-goals.md`. Use whichever is found to inform tradeoff analysis, approach selection, and scope decisions in the plan. Don't mention ethos if neither exists.
 
 ### Plan Contents
 
@@ -204,7 +204,7 @@ Build a complete briefing — each critic starts cold:
 3. Project context (language, framework, primary dependencies, testing framework, conventions from research)
 4. File paths the plan touches
 5. Tell the critic to read `.motif/context.md`
-6. If `ethos/` exists, tell the critic to read it and flag any plan decisions that conflict with stated principles or non-goals
+6. If `ethos.md` exists (or, as a fallback, an `ethos/` directory), tell the critic to read it and flag any plan decisions that conflict with stated principles or non-goals
 
 **Spawn all critics in parallel** — use a single message with multiple Agent tool calls. Each gets the same briefing. **Wait for all to complete.** Do not proceed to Stage 3 or spawn builders until all critic outputs have been read, triaged, the plan updated, and the user has approved (or auto-approve is set).
 
@@ -241,7 +241,7 @@ Do NOT pass `-m` or any model/reasoning flags — honor whatever the user's `~/.
 4. File paths the plan touches
 5. The merged Claude findings (or "Claude critics were skipped for this task" if light), framed as: *"Claude's critics found these. What did they miss? What do you disagree with? What plan-level concerns remain?"*
 6. Tell Codex to read `.motif/context.md` itself
-7. If `ethos/` exists, tell Codex to read it and flag any plan decisions that conflict with stated principles or non-goals
+7. If `ethos.md` exists (or, as a fallback, an `ethos/` directory), tell Codex to read it and flag any plan decisions that conflict with stated principles or non-goals
 8. **Output contract:** tell Codex to follow `agents/critic.md` exactly — it is the single source of truth for critic behavior. This includes: the 500-word hard cap, 8-finding cap, severity ordering (blockers → concerns → minor), no code blocks, file:line evidence required, the "No significant issues found" fallback when appropriate, and the required summary line `> Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].`
 
 **Merging Codex findings** — fold Codex's findings into the existing merged list, deduplicate across all sources (Claude + Codex), and re-triage. If a Codex finding agrees with a Claude finding on the same file/concern, elevate confidence and mark with source count (e.g., `[BLOCKER] (Claude 2/2 + Codex)`). Update the plan based on the re-triaged list before the approval gate.
