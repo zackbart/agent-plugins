@@ -68,7 +68,7 @@ The dev skill detects Context7 at runtime and uses it when present.
 
 ## Codex second-opinion critic
 
-The dev skill can run a sequential second-opinion pass via `codex exec` after the Claude critic merge. On by default for heavy tasks; off by default for medium and light. Use `--codex-critic` or "use codex to critique" to force it on (runs even on light tasks when explicitly requested). Use `--no-codex-critic` or "skip codex" to force it off. `--critic skip` skips it along with every other critic.
+The dev skill can run a sequential second-opinion pass via `codex exec` after the Claude critic merge. On by default for every complexity (heavy, medium, and light). Use `--no-codex-critic` or "skip codex" to force it off; use `--codex-critic` or "use codex to critique" to force it on if it was otherwise disabled. `--critic skip` skips it along with every other critic.
 
 **Invocation:**
 

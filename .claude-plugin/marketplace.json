@@ -22,7 +22,7 @@
     {
       "name": "motif",
       "description": "Personal development workflow plugin. Encodes a 4-stage process (Research, Plan, Build, Validate) for any codebase.",
-      "version": "0.9.19",
+      "version": "0.9.20",
       "author": {
         "name": "Zack Bart"
       },

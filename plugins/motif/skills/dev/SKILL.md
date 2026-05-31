@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.19"
+  version: "0.9.20"
 argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -101,7 +101,7 @@ Resolve whether to run it using this precedence (highest wins — apply in order
 1. `--critic skip` (or "skip the critic") — skip codex along with all other critics
 2. `--no-codex-critic` (or "skip codex", "no second opinion") — force off. Wins over `--codex-critic` if both are somehow present; explicit off always beats explicit on.
 3. `--codex-critic` (or "use codex to critique", "gpt second opinion") — force on. Runs even on light tasks when explicitly requested.
-4. Complexity default — **heavy: on**, medium: off, light: off
+4. Complexity default — **on** for every complexity (heavy, medium, light). Codex runs by default unless forced off above.
 
 Persist the resolved decision as `codexCritic: "on" | "off"` in `state.json`.
 
