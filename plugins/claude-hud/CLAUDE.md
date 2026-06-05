@@ -69,7 +69,8 @@ src/
 ├── config-reader.ts   # Read MCP/rules configs
 ├── config.ts          # Load/validate user config, merge themes + colors
 ├── themes.ts          # Named color theme presets (default, monochrome, dracula, solarized, catppuccin)
-├── git.ts             # Git status (branch, dirty, ahead/behind)
+├── git.ts             # Git status (branch, dirty, ahead/behind, worktree detection)
+├── pr-cache.ts        # Best-effort cached PR lookup for worktrees (detached `gh pr view`)
 ├── motif.ts           # Load motif workflow state from .motif/state.json (stage, tasks, critic, autoApprove)
 ├── types.ts           # TypeScript interfaces
 └── render/
@@ -113,6 +114,7 @@ The HUD supports two layout modes:
 - `model` - `[Opus]` badge (renderModelElement)
 - `path` - Project path (renderPathElement)
 - `git` - `git:(main*)` status (renderGitElement)
+- `worktree` - `⑂ <pr-or-branch>` indicator, only renders inside a linked git worktree (renderWorktreeElement). Shows `#123` once the PR resolves, otherwise the branch. Also auto-appended to the `project` bundle after `git`.
 - `session` - Session name (renderSessionElement)
 - `version` - `CC v2.1.81` (renderVersionElement)
 - `speed` - Output speed (renderSpeedElement)
@@ -142,9 +144,12 @@ Available themes: `default`, `monochrome`, `dracula`, `solarized`, `catppuccin`
 
 `main()` in `src/index.ts` conditionally fetches expensive data. When `config.lines` contains an element, its data is always fetched regardless of `display.show*` flags:
 - `git` in lines → always fetch git status
+- `worktree` in lines/elementOrder or `display.showWorktree` → fetch git status (worktree detection rides along)
 - `version` in lines → always fetch CC version
 - `memory` in lines → always fetch memory usage
 - `motif` in lines or elementOrder → always fetch motif state
+
+Worktree PR resolution (`display.showWorktreePr`) only runs when enabled *and* `gitStatus.isWorktree` is true. The lookup reads a TTL-cached value (`~/.claude/plugins/claude-hud/worktree-pr-cache/`) and refreshes it via a detached `gh pr view`, so the statusline tick never blocks on the network.
 
 ### Context Thresholds
 

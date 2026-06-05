@@ -11,7 +11,7 @@ export type ContextValueMode = 'percent' | 'tokens' | 'remaining' | 'both';
 export type HudElement =
   | 'project' | 'model' | 'path' | 'git' | 'session' | 'version' | 'speed' | 'duration' | 'customLabel'
   | 'context' | 'usage' | 'memory' | 'environment' | 'tools' | 'agents' | 'todos'
-  | 'motif' | 'diff';
+  | 'motif' | 'diff' | 'worktree';
 export type HudColorName =
   | 'dim'
   | 'red'
@@ -52,7 +52,7 @@ export const DEFAULT_ELEMENT_ORDER: HudElement[] = [
 
 const KNOWN_ELEMENTS = new Set<HudElement>([
   ...DEFAULT_ELEMENT_ORDER,
-  'model', 'path', 'git', 'session', 'version', 'speed', 'duration', 'customLabel', 'motif', 'diff',
+  'model', 'path', 'git', 'session', 'version', 'speed', 'duration', 'customLabel', 'motif', 'diff', 'worktree',
 ]);
 
 export type { HudThemeName } from './themes.js';
@@ -87,6 +87,8 @@ export interface HudConfig {
     showSessionName: boolean;
     showClaudeCodeVersion: boolean;
     showMemoryUsage: boolean;
+    showWorktree: boolean;
+    showWorktreePr: boolean;
     autocompactBuffer: AutocompactBufferMode;
     usageThreshold: number;
     sevenDayThreshold: number;
@@ -124,6 +126,8 @@ export const DEFAULT_CONFIG: HudConfig = {
     showSessionName: false,
     showClaudeCodeVersion: false,
     showMemoryUsage: false,
+    showWorktree: false,
+    showWorktreePr: false,
     autocompactBuffer: 'enabled',
     usageThreshold: 0,
     sevenDayThreshold: 80,
@@ -355,6 +359,12 @@ export function mergeConfig(userConfig: Partial<HudConfig>): HudConfig {
     showMemoryUsage: typeof migrated.display?.showMemoryUsage === 'boolean'
       ? migrated.display.showMemoryUsage
       : DEFAULT_CONFIG.display.showMemoryUsage,
+    showWorktree: typeof migrated.display?.showWorktree === 'boolean'
+      ? migrated.display.showWorktree
+      : DEFAULT_CONFIG.display.showWorktree,
+    showWorktreePr: typeof migrated.display?.showWorktreePr === 'boolean'
+      ? migrated.display.showWorktreePr
+      : DEFAULT_CONFIG.display.showWorktreePr,
     autocompactBuffer: validateAutocompactBuffer(migrated.display?.autocompactBuffer)
       ? migrated.display.autocompactBuffer
       : DEFAULT_CONFIG.display.autocompactBuffer,

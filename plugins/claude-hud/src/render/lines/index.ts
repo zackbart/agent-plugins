@@ -9,6 +9,7 @@ export {
   renderSpeedElement,
   renderDurationElement,
   renderCustomLabelElement,
+  renderWorktreeElement,
 } from './project.js';
 export { renderEnvironmentLine } from './environment.js';
 export { renderUsageLine } from './usage.js';

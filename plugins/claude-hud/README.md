@@ -124,6 +124,8 @@ Edit `~/.claude/plugins/claude-hud/config.json` or use `/claude-hud:configure`.
 | `display.showSessionName` | `false` | Session name |
 | `display.showClaudeCodeVersion` | `false` | CC version |
 | `display.showMemoryUsage` | `false` | RAM usage |
+| `display.showWorktree` | `false` | Show a `⑂` indicator with the branch when inside a linked git worktree (hidden in the main checkout) |
+| `display.showWorktreePr` | `false` | When `showWorktree` is on, show the worktree's PR number (`⑂ #123`) instead of the branch. Resolved via a cached, detached `gh pr view` — needs the GitHub CLI; falls back to the branch until/unless a PR is found |
 
 ## License
 

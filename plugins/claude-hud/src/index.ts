@@ -3,6 +3,7 @@ import { parseTranscript } from './transcript.js';
 import { render } from './render/index.js';
 import { countConfigs } from './config-reader.js';
 import { getGitStatus } from './git.js';
+import { getWorktreePr } from './pr-cache.js';
 import { loadConfig } from './config.js';
 import { parseExtraCmdArg, runExtraCmd } from './extra-cmd.js';
 import { getClaudeCodeVersion } from './version.js';
@@ -69,12 +70,26 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
     const config = await deps.loadConfig();
     const linesElements = config.lines ? new Set(config.lines.flat()) : null;
 
-    const needsGit = config.gitStatus.enabled || linesElements?.has('git') || linesElements?.has('diff');
+    const wantsWorktree = config.display.showWorktree
+      || linesElements?.has('worktree')
+      || config.elementOrder?.includes('worktree');
+    const needsGit = config.gitStatus.enabled
+      || linesElements?.has('git')
+      || linesElements?.has('diff')
+      || wantsWorktree;
     const gitStatus = needsGit
       ? await deps.getGitStatus(stdin.cwd, {
           showAheadBehind: config.gitStatus.showAheadBehind,
           showFileStats: config.gitStatus.showFileStats,
         })
+      : null;
+
+    // Resolve the worktree PR only when enabled and actually inside a linked
+    // worktree. The lookup is cached and refreshed in a detached process, so
+    // this read never blocks the statusline tick.
+    const worktreePr = wantsWorktree && config.display.showWorktreePr
+      && gitStatus?.isWorktree && stdin.cwd
+      ? getWorktreePr(stdin.cwd, gitStatus.branch, deps.now())
       : null;
 
     // Usage comes only from Claude Code's official stdin rate_limits fields.
@@ -116,6 +131,7 @@ export async function main(overrides: Partial<MainDeps> = {}): Promise<void> {
       config,
       extraLabel,
       claudeCodeVersion,
+      worktreePr,
     };
 
     deps.render(ctx);

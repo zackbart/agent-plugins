@@ -66,6 +66,8 @@ Questions: **Turn Off → Turn On → Git Style → Layout/Reset → Custom Line
   - "Usage limits" - 5h: 25% | 7d: 10%
   - "Session duration" - ⏱️ 5m
   - "Session name" - fix-auth-bug (session slug or custom title)
+  - "Worktree indicator" - ⑂ branch (only shows inside a linked git worktree)
+  - "Worktree PR number" - ⑂ #123 (needs Worktree indicator + GitHub CLI `gh`)
 
 ### Q4: Turn On (based on chosen preset)
 - header: "Turn On"
@@ -101,6 +103,7 @@ If user chooses "Enter custom text", use AskUserQuestion to get their text. Save
   - "Todo progress" - ▸ Fix bug (2/5 tasks)
   - "Project name" - my-project path display
   - "Git status" - git:(main*) branch indicator
+  - "Worktree indicator" - ⑂ branch / ⑂ #123 (only inside a linked worktree)
   - "Session name" - fix-auth-bug (session slug or custom title)
   - "Usage bar style" - ██░░ 25% visual bar (only if usageBarEnabled is true)
 
@@ -119,6 +122,8 @@ Info items (Counts, Tokens, Usage, Speed, Duration) can be turned off via "Reset
   - "Usage bar style" - ██░░ 25% visual bar (only if usageBarEnabled is false)
   - "Session name" - fix-auth-bug (session slug or custom title)
   - "Session duration" - ⏱️ 5m
+  - "Worktree indicator" - ⑂ branch (only shows inside a linked git worktree)
+  - "Worktree PR number" - ⑂ #123 (needs Worktree indicator + GitHub CLI `gh`)
 
 ### Q3: Git Style (only if Git is currently enabled)
 - header: "Git Style"
@@ -206,6 +211,8 @@ If user chooses "Remove", set `display.customLine` to `""` in config.
 | Todo progress | `display.showTodos` |
 | Project name | `display.showProject` |
 | Git status | `gitStatus.enabled` |
+| Worktree indicator | `display.showWorktree` |
+| Worktree PR number | `display.showWorktreePr` |
 | Config counts | `display.showConfigCounts` |
 | Token breakdown | `display.showTokenBreakdown` |
 | Output speed | `display.showSpeed` |
@@ -218,6 +225,8 @@ If user chooses "Remove", set `display.customLine` to `""` in config.
 **Always true (not configurable):**
 - `display.showModel: true`
 - `display.showContextBar: true`
+
+**Dependency:** `display.showWorktreePr` only has an effect when `display.showWorktree` is also on. If the user enables "Worktree PR number" without "Worktree indicator", also set `display.showWorktree: true`. Both render only when the session's cwd is a linked git worktree.
 
 ---
 

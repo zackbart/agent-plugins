@@ -14,6 +14,7 @@ import {
   renderVersionElement,
   renderDurationElement,
   renderCustomLabelElement,
+  renderWorktreeElement,
 } from '../dist/render/lines/project.js';
 import { renderToolsLine } from '../dist/render/tools-line.js';
 import { renderAgentsLine } from '../dist/render/agents-line.js';
@@ -1681,4 +1682,44 @@ test('project bundle still works with sub-elements available', () => {
   ctx.config.lines = [['project'], ['context']];
   const lines = captureRenderLines(ctx);
   assert.ok(lines.find(l => l.includes('my-project') && l.includes('git:(main')));
+});
+
+test('renderWorktreeElement is hidden when not in a linked worktree', () => {
+  const ctx = baseContext();
+  ctx.config.display.showWorktree = true;
+  ctx.gitStatus = { branch: 'feat-x', isDirty: false, ahead: 0, behind: 0, isWorktree: false };
+  assert.equal(renderWorktreeElement(ctx), null);
+});
+
+test('renderWorktreeElement is hidden when showWorktree is off', () => {
+  const ctx = baseContext();
+  ctx.config.display.showWorktree = false;
+  ctx.gitStatus = { branch: 'feat-x', isDirty: false, ahead: 0, behind: 0, isWorktree: true };
+  assert.equal(renderWorktreeElement(ctx), null);
+});
+
+test('renderWorktreeElement shows ⑂ + branch when in a worktree without a resolved PR', () => {
+  const ctx = baseContext();
+  ctx.config.display.showWorktree = true;
+  ctx.gitStatus = { branch: 'feat-x', isDirty: false, ahead: 0, behind: 0, isWorktree: true };
+  const out = stripAnsi(renderWorktreeElement(ctx) ?? '');
+  assert.equal(out, '⑂ feat-x');
+});
+
+test('renderWorktreeElement shows ⑂ + #PR when the PR has resolved', () => {
+  const ctx = baseContext();
+  ctx.config.display.showWorktree = true;
+  ctx.gitStatus = { branch: 'feat-x', isDirty: false, ahead: 0, behind: 0, isWorktree: true };
+  ctx.worktreePr = 123;
+  const out = stripAnsi(renderWorktreeElement(ctx) ?? '');
+  assert.equal(out, '⑂ #123');
+});
+
+test('renderProjectLine appends the worktree indicator after git', () => {
+  const ctx = baseContext();
+  ctx.stdin.cwd = '/home/user/my-project';
+  ctx.config.display.showWorktree = true;
+  ctx.gitStatus = { branch: 'feat-x', isDirty: true, ahead: 0, behind: 0, isWorktree: true };
+  const line = stripAnsi(renderProjectLine(ctx) ?? '');
+  assert.match(line, /my-project git:\(feat-x\*\) ⑂ feat-x/);
 });

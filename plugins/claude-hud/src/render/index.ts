@@ -16,6 +16,7 @@ import {
   renderSpeedElement,
   renderDurationElement,
   renderCustomLabelElement,
+  renderWorktreeElement,
   renderEnvironmentLine,
   renderUsageLine,
   renderMemoryLine,
@@ -357,6 +358,8 @@ function renderElementLine(ctx: RenderContext, element: HudElement): string | nu
       return renderPathElement(ctx);
     case 'git':
       return renderGitElement(ctx);
+    case 'worktree':
+      return renderWorktreeElement(ctx);
     case 'session':
       return display?.showSessionName ? renderSessionElement(ctx) : null;
     case 'version':
@@ -418,6 +421,8 @@ function renderElementForLines(ctx: RenderContext, element: HudElement): string 
       };
       return renderGitElement(gitCtx);
     }
+    case 'worktree':
+      return renderWorktreeElement(withDisplay({ showWorktree: true }));
     case 'session':
       return renderSessionElement(withDisplay({ showSessionName: true }));
     case 'version':

@@ -22,6 +22,8 @@ export interface GitStatus {
   behind: number;
   fileStats?: FileStats;
   diffStats?: DiffStats;
+  /** True when cwd is a linked worktree (created via `git worktree add`), not the main checkout. */
+  isWorktree: boolean;
 }
 
 export async function getGitBranch(cwd?: string): Promise<string | null> {
@@ -63,7 +65,7 @@ export async function getGitStatus(cwd?: string, options?: GitStatusOptions): Pr
     if (!branch) return null;
 
     // Run remaining subprocesses in parallel
-    const [statusResult, aheadBehindResult, diffResult] = await Promise.all([
+    const [statusResult, aheadBehindResult, diffResult, worktreeResult] = await Promise.all([
       // Subprocess 2: dirty state + file stats (always run)
       execFileAsync(
         'git',
@@ -88,6 +90,15 @@ export async function getGitStatus(cwd?: string, options?: GitStatusOptions): Pr
             { cwd, timeout: 1000, encoding: 'utf8' }
           ).catch(() => null)
         : Promise.resolve(null),
+
+      // Subprocess 5: worktree detection (always run, cheap).
+      // In a linked worktree, --git-dir points inside <main>/.git/worktrees/<name>
+      // while --git-common-dir points at the shared <main>/.git.
+      execFileAsync(
+        'git',
+        ['rev-parse', '--path-format=absolute', '--git-dir', '--git-common-dir'],
+        { cwd, timeout: 1000, encoding: 'utf8' }
+      ).catch(() => null),
     ]);
 
     // Parse dirty state and file stats
@@ -118,7 +129,16 @@ export async function getGitStatus(cwd?: string, options?: GitStatusOptions): Pr
       diffStats = parseShortstat(diffResult.stdout.trim());
     }
 
-    return { branch, isDirty, ahead, behind, fileStats, diffStats };
+    // Parse worktree detection: two non-equal absolute paths → linked worktree.
+    let isWorktree = false;
+    if (worktreeResult) {
+      const lines = worktreeResult.stdout.trim().split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length === 2) {
+        isWorktree = lines[0] !== lines[1];
+      }
+    }
+
+    return { branch, isDirty, ahead, behind, fileStats, diffStats, isWorktree };
   } catch {
     return null;
   }

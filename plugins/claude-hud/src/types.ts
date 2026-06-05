@@ -119,4 +119,6 @@ export interface RenderContext {
   config: HudConfig;
   extraLabel: string | null;
   claudeCodeVersion?: string;
+  /** Resolved PR number for the current worktree branch, or null when unknown/unresolved. */
+  worktreePr?: number | null;
 }

@@ -74,6 +74,21 @@ export function renderGitElement(ctx: RenderContext): string | null {
   return `${gitColor('git:(', colors)}${gitBranchColor(gitParts.join(''), colors)}${gitColor(')', colors)}`;
 }
 
+export function renderWorktreeElement(ctx: RenderContext): string | null {
+  const display = ctx.config?.display;
+  const colors = ctx.config?.colors;
+
+  if (!display?.showWorktree || !ctx.gitStatus?.isWorktree) {
+    return null;
+  }
+
+  // Prefer the PR number when it has resolved; otherwise fall back to the branch.
+  const pr = ctx.worktreePr;
+  const ident = typeof pr === 'number' ? `#${pr}` : ctx.gitStatus.branch;
+
+  return `${gitColor('⑂', colors)} ${gitBranchColor(ident, colors)}`;
+}
+
 export function renderSessionElement(ctx: RenderContext): string | null {
   const display = ctx.config?.display;
   const colors = ctx.config?.colors;
@@ -144,15 +159,13 @@ export function renderProjectLine(ctx: RenderContext): string | null {
     parts.push(modelPart);
   }
 
-  // path + git are space-joined (not │) when rendered as the project bundle
+  // path + git + worktree are space-joined (not │) when rendered as the project bundle
   const pathPart = renderPathElement(ctx);
   const gitPart = renderGitElement(ctx);
-  if (pathPart && gitPart) {
-    parts.push(`${pathPart} ${gitPart}`);
-  } else if (pathPart) {
-    parts.push(pathPart);
-  } else if (gitPart) {
-    parts.push(gitPart);
+  const worktreePart = renderWorktreeElement(ctx);
+  const projectGroup = [pathPart, gitPart, worktreePart].filter(Boolean).join(' ');
+  if (projectGroup) {
+    parts.push(projectGroup);
   }
 
   const sessionPart = renderSessionElement(ctx);

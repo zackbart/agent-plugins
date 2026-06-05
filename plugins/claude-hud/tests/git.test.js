@@ -204,3 +204,42 @@ test('getGitStatus counts deleted files', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('getGitStatus reports isWorktree=false for the main checkout', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'claude-hud-git-'));
+  try {
+    execFileSync('git', ['init'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['commit', '--allow-empty', '-m', 'init'], { cwd: dir, stdio: 'ignore' });
+
+    const result = await getGitStatus(dir);
+    assert.equal(result?.isWorktree, false);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('getGitStatus reports isWorktree=true inside a linked worktree', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'claude-hud-git-'));
+  const wt = await mkdtemp(path.join(tmpdir(), 'claude-hud-wt-'));
+  // git worktree add needs the target dir to not exist; use a child path.
+  const wtPath = path.join(wt, 'linked');
+  try {
+    execFileSync('git', ['init'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.email', 'test@test.com'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['commit', '--allow-empty', '-m', 'init'], { cwd: dir, stdio: 'ignore' });
+    execFileSync('git', ['worktree', 'add', '-b', 'feat-x', wtPath], { cwd: dir, stdio: 'ignore' });
+
+    const main = await getGitStatus(dir);
+    assert.equal(main?.isWorktree, false, 'main checkout is not a worktree');
+
+    const linked = await getGitStatus(wtPath);
+    assert.equal(linked?.isWorktree, true, 'linked checkout is a worktree');
+    assert.equal(linked?.branch, 'feat-x');
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+    await rm(wt, { recursive: true, force: true });
+  }
+});
