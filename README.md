@@ -6,8 +6,8 @@ Personal Claude Code plugin marketplace.
 
 | Plugin | Version | Description |
 |---|---|---|
-| [claude-hud](plugins/claude-hud/) | 0.0.16 | Real-time statusline HUD for Claude Code |
-| [motif](plugins/motif/) | 0.9.14 | 4-stage development workflow (Research, Plan, Build, Validate) — also installable as a Codex CLI plugin |
+| [claude-hud](plugins/claude-hud/) | 0.0.17 | Real-time statusline HUD for Claude Code |
+| [motif](plugins/motif/) | 0.9.20 | 4-stage development workflow (Research, Plan, Build, Validate) — also installable as a Codex CLI plugin |
 | [helm](plugins/helm/) | 0.2.1 | Autonomous agent sessions from discovery to merged PR |
 
 ## Installation
