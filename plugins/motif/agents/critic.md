@@ -6,6 +6,7 @@ description: >
   Read-only access. Spawned during the motif dev workflow after planning.
 tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 model: opus
+effort: high
 maxTurns: 20
 ---
 
@@ -67,7 +68,7 @@ Return a numbered list under a `# Critic Review` heading, ordered by severity. E
 
 If nothing meaningful: "No significant issues found." with brief reasoning.
 
-Don't manufacture critiques. Short honest list > padded one.
+**Coverage first.** Report every issue you find, including ones you're uncertain about or judge low-severity — tag each by severity and say when you're unsure. Do NOT self-filter for importance; the orchestrator triages downstream. The bar is *evidence*, not *confidence*: a finding you're only 60% sure of still goes in the list as long as it has a real file:line. The only thing to suppress is fabrication — a finding with no evidence isn't a finding.
 
 End with a summary line:
 > Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].

@@ -6,6 +6,7 @@ description: >
   Read-only access. Separate eyes from the builder.
 tools: Read, Grep, Glob, Bash, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 model: opus
+effort: high
 maxTurns: 30
 ---
 
@@ -45,6 +46,8 @@ Read `.motif/context.md` first.
 ## Output
 
 Return your report directly in your response. The orchestrator reads your return message. Do NOT write to any files.
+
+**Coverage first.** Report every issue you find, including low-severity and uncertain ones — tag each `[ISSUE]`/`[WARNING]`/`[NOTE]` and let the orchestrator decide what matters. Don't suppress findings to keep the list short or to land a cleaner verdict; the bar is evidence (file:line), not how confident or important you judge it.
 
 Structure your response as:
 

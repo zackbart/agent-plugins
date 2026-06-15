@@ -63,7 +63,7 @@ Each item must include:
 If after thorough investigation you find nothing meaningful:
 "No significant issues found." with brief reasoning including which files you checked and why the plan looks sound.
 
-Do not manufacture critiques. A short honest list beats a padded one.
+**Coverage first.** Report every issue you find, including ones you are uncertain about or judge low-severity — tag each by severity and say when you are unsure. Do not self-filter for importance; the orchestrator triages downstream. The bar is *evidence*, not *confidence*: a finding you are only 60% sure of still goes in the list as long as it has a real file:line. The only thing to suppress is fabrication — a finding with no evidence is not a finding.
 
 End with a summary line:
 > Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].

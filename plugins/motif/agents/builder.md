@@ -6,6 +6,7 @@ description: >
   a shared context artifact. Reports back with results and issues.
 tools: Read, Grep, Glob, Bash, Write, Edit, mcp__plugin_context7_context7__resolve-library-id, mcp__plugin_context7_context7__query-docs
 model: opus
+effort: high
 maxTurns: 35
 ---
 
@@ -51,6 +52,8 @@ End with a summary line:
 > Status: [completed/failed]. [1 sentence]. Files: [N]. Tests: [pass/fail].
 
 ## Boundaries
+
+You run **autonomously** — the orchestrator is not interactive and cannot answer questions mid-task. For reversible, in-scope decisions (a variable name, which of two equivalent approaches, a default value), pick a sensible option and note it in your report. Don't end your turn to ask.
 
 **Stop and report** if: design decision not in plan, unexpected failure suggesting plan is wrong, depends on unfinished work, scope much larger than described.
 

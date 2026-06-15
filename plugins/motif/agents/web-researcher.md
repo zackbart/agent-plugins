@@ -8,7 +8,8 @@ description: >
   and synthesizes findings into an actionable research brief. Read-only — never
   modifies files.
 disallowedTools: Write, Edit, NotebookEdit, Agent
-model: inherit
+model: sonnet
+effort: high
 maxTurns: 60
 ---
 

@@ -13,14 +13,28 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.9.20"
-argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku] | --resume"
+  version: "0.10.0"
+argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku|fable] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
 
 # Motif Development Workflow
 
 4-stage development process: Research → Plan → Build → Validate. The plan is the single approval gate. Once approved, Build and Validate run autonomously.
+
+## Portability
+
+This skill is the single source of truth for the workflow and runs on **any** Agent Skills runtime — Claude Code, Codex CLI, OpenCode, Cursor, and others. It is described using Claude Code's primitives because that is its primary home, but every one of them has a runtime-agnostic fallback. When a primitive named below is unavailable, use the fallback and continue — never block on a missing capability.
+
+| Primitive (Claude Code) | What it does | Fallback when unavailable |
+|---|---|---|
+| `Agent` (subagents: researcher, critic, builder, validator) | Delegates a stage to a fresh-context agent | The orchestrator performs the stage **inline** itself. References to "spawn/delegate to the X subagent" mean "do X's job yourself." |
+| `TaskCreate` / `TaskUpdate` / `TaskList` / `TaskGet` | Native task tracking during Build | Maintain the task list as a markdown checklist in `.motif/context.md` under `## Tasks` (status: `pending`/`in_progress`/`completed`). This file is the durable record either way. |
+| `AskUserQuestion` | Structured interactive prompt | Present the choices as plain text (e.g. `go` / `redo` / `stop`) and wait for the user's reply via whatever input your runtime has. |
+| Parallel `Agent` calls | Run independent critics/builders concurrently | Run them **sequentially**. Results are equivalent; only wall-clock differs. |
+| Codex second opinion (`codex exec`) | Cross-model critic pass | Requires the `codex` binary and a shell. If either is absent, skip silently — it is purely additive and never gates approval. |
+
+Wherever the prose below says "subagent", "Agent tool call", or a specific `Task*` tool, read it through this table. The workflow's logic — stages, the single approval gate, state files, resume — is identical on every runtime.
 
 ## Resume Support
 
@@ -37,7 +51,7 @@ Parse optional flags from the argument string (flags and natural language are eq
 - **Critic:** `--critic skip` or "skip the critic" (critics run automatically for medium/heavy tasks unless skipped)
 - **Auto-approve:** `--auto` or "auto approve", "just run it", "hands off"
 - **Codex second opinion:** `--codex-critic` / "use codex to critique", "gpt second opinion" (force on); `--no-codex-critic` / "skip codex", "no second opinion" (force off). Natural language always overrides the complexity default below.
-- **Subagent model override:** `--model opus|sonnet|haiku` or natural language like "use sonnet", "run with sonnet", "with opus", "on haiku". Overrides the per-agent frontmatter for every spawned subagent (researcher, critic, builder, validator, web-researcher) in this workflow only. If omitted, each agent uses its frontmatter default (currently `opus` for all four core agents; `inherit` for `web-researcher`).
+- **Subagent model override:** `--model opus|sonnet|haiku|fable` or natural language like "use sonnet", "with opus", "on fable", "push it to fable". Overrides the per-agent frontmatter for every spawned subagent (researcher, critic, builder, validator, web-researcher) in this workflow only. If omitted, each agent uses its frontmatter default: `sonnet` for the read-only `researcher` and `web-researcher`, `opus` for `critic`, `builder`, and `validator`. `fable` (Claude Fable 5) is the heaviest option — useful for pushing the whole run to maximum capability on a hard task. **Caveat:** a global `CLAUDE_CODE_SUBAGENT_MODEL` env var (or settings.json value) set to a concrete model overrides both this flag and the frontmatter — all subagents then use that model regardless. It must be unset or `inherit` for per-agent models and this flag to take effect.
 
 Strip configuration to get the raw task description. Store parsed values in `.motif/state.json`.
 
@@ -272,6 +286,8 @@ Replace the `## Plan` section in `.motif/context.md` with the approved plan. Upd
 ### Task Decomposition
 
 **Do NOT use TaskCreate, TaskUpdate, TaskList, or TaskGet outside of Stage 3: Build. These tools are exclusively for tracking build implementation work.**
+
+*(Portability: if your runtime has no native task tools, track the same tasks as a markdown checklist in `.motif/context.md` under `## Tasks` — see the Portability table. Every `Task*` call below maps to creating or updating a checklist item.)*
 
 Break the plan into discrete implementation tasks. For each task:
 
