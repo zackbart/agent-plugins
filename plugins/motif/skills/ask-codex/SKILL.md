@@ -5,13 +5,16 @@ description: >
   a code review, a design decision, a "what would another model say." Use when
   the user asks to "ask codex", "what does codex think", "get a second opinion",
   "cross-check with codex", "cross-check with gpt", or invokes /motif:ask-codex.
+  Also generates images via Codex's OpenAI image model — use when the user asks
+  to "ask codex to make/generate an image", "have codex draw/create an
+  icon/banner/illustration", or "use openai image gen".
 license: MIT
 compatibility: >
   Requires the Codex CLI (`codex`) on PATH. Honors the user's
   ~/.codex/config.toml for model and reasoning settings.
 metadata:
   author: zackbart
-  version: "0.9.18"
+  version: "0.10.1"
 argument-hint: "<question>"
 allowed-tools: "Read, Grep, Glob, Bash"
 disable-model-invocation: false
@@ -27,7 +30,11 @@ Trigger on natural language: "ask codex about X", "what does codex think", "get 
 
 Do NOT invoke when the user is running the full `/motif:dev` workflow — Stage 2 of that skill already runs a structured codex critic pass with merge logic.
 
-## Build the briefing
+**Classify the ask first.** If it asks to create or edit an image (icon, banner, illustration, sprite, placeholder art), use **Image generation mode** — skip straight to that section; it has its own briefing and invocation. Everything else is **Second-opinion mode**, described immediately below.
+
+## Second-opinion mode
+
+### Build the briefing
 
 Codex starts with no context. Assemble a single string `$BRIEFING` containing the sections below. Skip any section that has nothing meaningful to include.
 
@@ -40,7 +47,7 @@ Codex starts with no context. Assemble a single string `$BRIEFING` containing th
 
 Keep the briefing focused. A bloated briefing buries the question.
 
-## Invoke Codex
+### Invoke Codex
 
 Run the command exactly as written:
 
@@ -56,13 +63,13 @@ printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null
 
 **Wall-clock bound:** 5 minutes. When invoking via the Bash tool, set `timeout: 300000`. On systems with `timeout`/`gtimeout` available, wrap as `timeout 300 bash -c '...'`.
 
-## Surface the reply
+### Surface the reply
 
 Print Codex's stdout verbatim under a `**Codex says:**` header. Do not synthesize, do not append Claude's own commentary, do not edit for length. The user invoked this skill specifically to hear from another model.
 
 If the reply is long, it's long. Don't truncate.
 
-## Failure handling
+### Failure handling
 
 This skill diverges from the Stage 2 codex critic's silent-skip behavior. The user explicitly asked, so failures must be surfaced clearly:
 
@@ -73,9 +80,33 @@ This skill diverges from the Stage 2 codex critic's silent-skip behavior. The us
 
 Never silently skip. Never claim Codex weighed in when it didn't.
 
+## Image generation mode
+
+Codex can generate and edit images with OpenAI's image model (`gpt-image-2` by default). Use this mode when the user wants an actual image file — an icon, banner, illustration, sprite sheet, placeholder art — not a written opinion. Verified against `codex-cli` 0.141.0.
+
+**Build `$BRIEFING`** — unlike second-opinion mode, it's just the image request, no conversation summary or git diff. Prefix it with `$imagegen` (this is what routes Codex to image generation) and tell Codex to save the file and print its path:
+
+```
+$imagegen <the user's image request, verbatim>. Save the generated image into the current working directory and print the saved file path.
+```
+
+**Invoke** — image generation writes a file, so this mode uses `-s workspace-write` (read-only blocks the write):
+
+```bash
+printf '%s' "$BRIEFING" | codex exec -s workspace-write --cd "$(pwd)" - 2>/dev/null
+```
+
+To edit or seed from a reference image, add `-i` before the `-` (repeat the flag or comma-separate for multiple): `... --cd "$(pwd)" -i ref1.png -i ref2.png - 2>/dev/null`. Same 5-minute bound and `timeout: 300000`. Still no `-m` flag — honor `~/.codex/config.toml`.
+
+**Surface the result:** report the path(s) of the written file(s) so the user can open them. Do not print binary image data.
+
+**Failure handling — note the difference from second-opinion mode:** here, success is a *file on disk*, not stdout. Empty stdout is NOT a failure if the image was written. Treat it as failure only when no new file exists or the exit code is non-zero. The `codex`-not-on-PATH (exit 127) and timeout cases carry over unchanged. One extra case worth knowing: Codex refuses to run outside a trusted directory (`Not inside a trusted directory...`) — in normal use `$(pwd)` is the user's repo so this won't fire, but if it does, the cwd isn't a git repo. Never silently skip.
+
 ## Persistence
 
-None. Do not write the briefing or reply to disk. The reply lands in the conversation and that's it.
+Second-opinion mode writes nothing — the reply lands in the conversation and that's it. Do not write the briefing or reply to disk.
+
+Image-generation mode is the exception: Codex writes the generated image file(s) into the working directory. That file is the deliverable; report its path and leave it in place.
 
 ## Recursive case
 
