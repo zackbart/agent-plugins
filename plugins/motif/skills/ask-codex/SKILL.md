@@ -14,7 +14,7 @@ compatibility: >
   ~/.codex/config.toml for model and reasoning settings.
 metadata:
   author: zackbart
-  version: "0.10.1"
+  version: "0.10.2"
 argument-hint: "<question>"
 allowed-tools: "Read, Grep, Glob, Bash"
 disable-model-invocation: false

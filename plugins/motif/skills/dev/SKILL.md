@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.10.1"
+  version: "0.10.2"
 argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku|fable] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
@@ -351,7 +351,9 @@ Runs automatically after Build.
 
 Remove `.motif/.active`. Update state.json: set stage to `"validate"` and `stageStartedAt` to the current ISO timestamp.
 
-Spawn the `validator` subagent with:
+Two independent validators run **in parallel, every time**: the Claude `validator` subagent and a Codex second-opinion pass over the same change set. Launch both concurrently — in Claude Code, issue the Agent spawn and the Bash `codex` call in the same turn so they run together; on runtimes without concurrent tool calls, run them in either order (they're independent). Then merge their reports. The Codex pass is additive insurance and never gates — if Codex is unavailable or fails, validation degrades to Claude-only.
+
+**Claude validator** — spawn the `validator` subagent with:
 1. Original task description
 2. Complexity level
 3. Pointer to `.motif/context.md`
@@ -360,7 +362,34 @@ Spawn the `validator` subagent with:
 
 It returns its report in the return message. **Truncation detection:** If the return message is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Verdict: [verdict]..."), treat it as truncated and run validation inline.
 
-Present the report. If issues found:
+**Codex validator** — run a single read-only Codex pass. Capture stdout as findings; discard stderr (session banner, input echo, reasoning trace):
+
+```bash
+printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null
+```
+
+Do NOT pass `-m` or any model/reasoning flags — honor the user's `~/.codex/config.toml`. Bound at ~5 min wall-clock.
+
+Build `$BRIEFING` with:
+1. Original task description, verbatim
+2. Complexity level
+3. Changed files list (`git diff --name-only <baseCommit>`)
+4. Toolchain commands (test/build/lint)
+5. Tell Codex to read `.motif/context.md` itself — `## Plan` for the intended approach, `## Research` for conventions and toolchain
+6. If `ethos.md` exists (or, as a fallback, an `ethos/` directory), tell Codex to read it and flag any work that conflicts with stated principles or non-goals
+7. **Output contract:** tell Codex to follow `agents/validator.md` exactly — it is the single source of truth for validator behavior. This includes the 500-word hard cap, 8-finding cap, `[ISSUE]`/`[WARNING]`/`[NOTE]` tagging, no code blocks, file:line evidence required, the PASS / PASS WITH NOTES / ISSUES FOUND verdict, and the required summary line `> Verdict: [verdict]. [1-2 sentences]. Issues: [N], Warnings: [N], Notes: [N].`
+
+**Codex failure handling** — never blocks; any failure mode silently degrades to Claude-only validation:
+- `codex` not on PATH (exit 127 or `command not found`) → log "Codex validator skipped: not installed", continue
+- Non-zero exit → log "Codex validator skipped: exit <code>", continue
+- Empty stdout, very short (under ~100 characters), or missing the `> Verdict:` summary line → log "Codex validator skipped: truncated/incomplete", continue
+- Wall-clock timeout (~5 min) → kill and log "Codex validator skipped: timeout", continue
+
+**Recursive case:** if motif is itself running inside a Codex CLI session, shelling out to `codex exec` spawns a fresh subprocess with its own context and session — expected and safe.
+
+**Merge both reports** — fold Codex's findings into the Claude validator's report, deduplicate across both sources (same file, same concern), and re-triage. When both flag the same issue, elevate it and mark the agreement (e.g., `[ISSUE] (Claude + Codex)`). Present one combined report.
+
+If issues found:
 - **fix** → reinstate `.motif/.active`, go back to Build
 - **done** → accept current state
 
