@@ -1,4 +1,14 @@
-# agent-plugins
+<p align="center">
+  <a href="https://github.com/zackbart/agent-plugins">
+    <img src="https://shieldcn.dev/header/graph.svg?title=agent-plugins&subtitle=personal+Claude+Code+plugin+marketplace&logo=claude&mode=light&align=center&font=geist-mono&border=false" alt="agent-plugins">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/zackbart/agent-plugins/stargazers">
+    <img src="https://shieldcn.dev/github/stars/zackbart/agent-plugins.svg" alt="Stars">
+  </a>
+</p>
 
 Personal Claude Code plugin marketplace.
 
