@@ -13,7 +13,7 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.10.2"
+  version: "0.11.0"
 argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku|fable] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---

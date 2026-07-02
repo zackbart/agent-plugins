@@ -1,6 +1,6 @@
 # Motif — Claude Code Plugin
 
-A Claude Code development workflow plugin. Version 0.10.2.
+A Claude Code development workflow plugin. Version 0.11.0.
 
 Motif is a Claude Code plugin, but the `dev` skill itself is written to the
 [Agent Skills](https://agentskills.io) standard and is runtime-agnostic — any
@@ -13,6 +13,7 @@ skill prose, not in parallel manifests.
 - `skills/` — universal skills (work via npx skills and as slash commands)
   - `dev/` — 4-stage workflow orchestrator (Research, Plan, Build, Validate); written to be portable across Agent Skills runtimes
   - `ask-codex/` — consult the Codex CLI for a second opinion on any question (shells out to the `codex` binary; runs on Claude Code)
+  - `models/` — model-routing policy (gpt-5.5 / sonnet-5 / opus-4.8 / fable-5 ranking + how to route work). Auto-injected at session start **only on Fable sessions** (via the SessionStart hook); invocable on demand elsewhere as `/motif:models`
 - `agents/` — Claude Code subagents (Opus)
   - `researcher.md` — codebase exploration (Stage 1: Research) — read-only, has Context7 MCP
   - `critic.md` — adversarial plan review via Claude (Stage 2: Plan) — read-only, has Context7 MCP
@@ -20,7 +21,7 @@ skill prose, not in parallel manifests.
   - `validator.md` — independent build audit (Stage 4: Validate) — read-only, has Context7 MCP
   - `web-researcher.md` — deep web research for external knowledge (not part of 4-stage flow, spawned on demand)
   - `references/critic-process.md` — shared critic review methodology (single source of truth)
-- `hooks/hooks.json` — SessionStart hook for workflow reminders and interruption detection
+- `hooks/hooks.json` — SessionStart hooks: (1) workflow reminders + interruption detection; (2) Fable-only guard that greps the hook payload's `model` field and, when it matches `fable`, `cat`s `skills/models/SKILL.md` into context so the routing policy is live. `model` is optional in the payload and SessionStart doesn't re-fire on a mid-session `/model` switch — both cases fall back to `/motif:models`
 - `.claude-plugin/plugin.json` — plugin manifest for Claude Code
 
 ## Conventions

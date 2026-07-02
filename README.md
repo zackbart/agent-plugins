@@ -17,7 +17,7 @@ Personal Claude Code plugin marketplace.
 | Plugin | Version | Description |
 |---|---|---|
 | [claude-hud](plugins/claude-hud/) | 0.0.17 | Real-time statusline HUD for Claude Code |
-| [motif](plugins/motif/) | 0.10.2 | 4-stage development workflow (Research, Plan, Build, Validate) |
+| [motif](plugins/motif/) | 0.11.0 | 4-stage development workflow (Research, Plan, Build, Validate) |
 
 ## Installation
 
