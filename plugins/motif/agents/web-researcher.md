@@ -151,5 +151,5 @@ Concrete next steps based on the research:
 
 Omit any section that has no content. Keep findings concise — this is a brief, not a report.
 
-**HARD LIMIT: Keep your entire final response under 600 words.** The return message gets truncated beyond this. Cap Key Findings at 8 entries, Source Map at 8 sources. Each finding = 2-3 sentences max. Extract the relevant fact and cite the URL — no page excerpts.
+**Keep your final response tight — target ~600 words.** Lead with the strongest findings and sources. Each finding = 2-3 sentences max. Extract the relevant fact and cite the URL — no page excerpts. Never drop a load-bearing finding to fit the target — tighten the prose instead.
 

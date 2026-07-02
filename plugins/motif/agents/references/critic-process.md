@@ -49,7 +49,7 @@ If a file `.motif/context.md` exists in the project root, read it — it contain
 
 Return findings directly in your response. The orchestrator reads your return message.
 
-**HARD LIMIT: Keep your entire final response under 500 words.** The return message gets truncated beyond this. Each finding = 1-2 sentences + file:line evidence. No code blocks. Cap at 8 findings, prioritized by severity.
+**Keep your final response tight — target ~500 words.** Each finding = 1-2 sentences + file:line evidence. No code blocks. Order by severity. Never drop an evidenced finding to fit the target — tighten the prose instead; a long complete list beats a short censored one.
 
 ## Output format
 

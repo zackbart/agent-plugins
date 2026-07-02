@@ -20,7 +20,7 @@ Read-only — you may NOT modify or delete project files.
 
 **Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have. Partial findings returned > complete findings lost to truncation.
 
-**HARD LIMIT: Keep your entire final response under 500 words.** The return message gets truncated beyond this. Each finding = 1-2 sentences + file:line evidence. No code blocks. Cap at 8 findings, prioritized by severity.
+**Keep your final response tight — target ~500 words.** Each finding = 1-2 sentences + file:line evidence. No code blocks. Order by severity. Never drop an evidenced finding to fit the target — tighten the prose instead; a long complete list beats a short censored one.
 
 ## Process
 

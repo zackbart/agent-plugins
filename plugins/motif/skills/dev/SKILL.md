@@ -13,8 +13,8 @@ compatibility: >
   stages directly.
 metadata:
   author: zackbart
-  version: "0.11.0"
-argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|haiku|fable] | --resume"
+  version: "0.12.0"
+argument-hint: "<task description> [--critic skip] [--auto] [--codex-critic | --no-codex-critic] [--model opus|sonnet|fable] | --resume"
 allowed-tools: "Read, Grep, Glob, Bash, Write, Edit, Agent, TaskCreate, TaskUpdate, TaskList, TaskGet, AskUserQuestion"
 ---
 
@@ -36,6 +36,10 @@ This skill is the single source of truth for the workflow and runs on **any** Ag
 
 Wherever the prose below says "subagent", "Agent tool call", or a specific `Task*` tool, read it through this table. The workflow's logic — stages, the single approval gate, state files, resume — is identical on every runtime.
 
+## Subagent Return Handling
+
+A subagent's return message is **truncated** if it is empty, very short (under ~100 characters), or ends abruptly without that agent's expected `> ...` summary line. Each stage below says what to do when a return is truncated — apply this definition wherever a stage says "if truncated."
+
 ## Resume Support
 
 If the argument is `--resume`, check for `.motif/state.json`:
@@ -51,7 +55,7 @@ Parse optional flags from the argument string (flags and natural language are eq
 - **Critic:** `--critic skip` or "skip the critic" (critics run automatically for medium/heavy tasks unless skipped)
 - **Auto-approve:** `--auto` or "auto approve", "just run it", "hands off"
 - **Codex second opinion:** `--codex-critic` / "use codex to critique", "gpt second opinion" (force on); `--no-codex-critic` / "skip codex", "no second opinion" (force off). Natural language always overrides the complexity default below.
-- **Subagent model override:** `--model opus|sonnet|haiku|fable` or natural language like "use sonnet", "with opus", "on fable", "push it to fable". Overrides the per-agent frontmatter for every spawned subagent (researcher, critic, builder, validator, web-researcher) in this workflow only. If omitted, each agent uses its frontmatter default: `sonnet` for the read-only `researcher` and `web-researcher`, `opus` for `critic`, `builder`, and `validator`. `fable` (Claude Fable 5) is the heaviest option — useful for pushing the whole run to maximum capability on a hard task. **Caveat:** a global `CLAUDE_CODE_SUBAGENT_MODEL` env var (or settings.json value) set to a concrete model overrides both this flag and the frontmatter — all subagents then use that model regardless. It must be unset or `inherit` for per-agent models and this flag to take effect.
+- **Subagent model override:** `--model opus|sonnet|fable` or natural language like "use sonnet", "with opus", "on fable", "push it to fable". (Haiku is deliberately not offered — see the models routing policy.) Overrides the per-agent frontmatter for every spawned subagent (researcher, critic, builder, validator, web-researcher) in this workflow only. If omitted, each agent uses its frontmatter default: `sonnet` for the read-only `researcher` and `web-researcher`, `opus` for `critic`, `builder`, and `validator`. `fable` (Claude Fable 5) is the heaviest option — useful for pushing the whole run to maximum capability on a hard task. **Caveat:** a global `CLAUDE_CODE_SUBAGENT_MODEL` env var (or settings.json value) set to a concrete model overrides both this flag and the frontmatter — all subagents then use that model regardless. It must be unset or `inherit` for per-agent models and this flag to take effect.
 
 Strip configuration to get the raw task description. Store parsed values in `.motif/state.json`.
 
@@ -115,7 +119,7 @@ Resolve whether to run it using this precedence (highest wins — apply in order
 1. `--critic skip` (or "skip the critic") — skip codex along with all other critics
 2. `--no-codex-critic` (or "skip codex", "no second opinion") — force off. Wins over `--codex-critic` if both are somehow present; explicit off always beats explicit on.
 3. `--codex-critic` (or "use codex to critique", "gpt second opinion") — force on. Runs even on light tasks when explicitly requested.
-4. Complexity default — **on** for every complexity (heavy, medium, light). Codex runs by default unless forced off above.
+4. Complexity default — **on** for medium and heavy, **off** for light. A light task's plan is small enough that a ~5-minute cross-model pass rarely pays for its latency; force it on with `--codex-critic` when a light change is riskier than it looks.
 
 Persist the resolved decision as `codexCritic: "on" | "off"` in `state.json`.
 
@@ -179,7 +183,7 @@ Delegate to the researcher subagent with:
 
 The researcher returns its findings in its return message. **Wait for it to complete.** Do not start planning until research findings are in hand.
 
-**Truncation detection:** If the return message is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Found [N] relevant files..."), treat it as truncated. Research inline to fill the gaps — you already have the task context, so focus on the specific files and patterns the researcher was trying to find.
+**If truncated** (see Subagent Return Handling): research inline to fill the gaps — you already have the task context, so focus on the specific files and patterns the researcher was trying to find.
 
 Without a researcher subagent, research directly.
 
@@ -222,7 +226,7 @@ Build a complete briefing — each critic starts cold:
 
 **Spawn all critics in parallel** — use a single message with multiple Agent tool calls. Each gets the same briefing. **Wait for all to complete.** Do not proceed to Stage 3 or spawn builders until all critic outputs have been read, triaged, the plan updated, and the user has approved (or auto-approve is set).
 
-**Truncation detection:** A critic's return message is truncated if it is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Found [N] blockers..."). Drop failed critics silently — the remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate.
+**If a critic's return is truncated** (see Subagent Return Handling), drop it silently — the remaining critics' findings are sufficient. If ALL critics fail, note that critic review was lost and proceed to the approval gate.
 
 ### Merging Critic Findings
 
@@ -256,7 +260,7 @@ Do NOT pass `-m` or any model/reasoning flags — honor whatever the user's `~/.
 5. The merged Claude findings (or "Claude critics were skipped for this task" if light), framed as: *"Claude's critics found these. What did they miss? What do you disagree with? What plan-level concerns remain?"*
 6. Tell Codex to read `.motif/context.md` itself
 7. If `ethos.md` exists (or, as a fallback, an `ethos/` directory), tell Codex to read it and flag any plan decisions that conflict with stated principles or non-goals
-8. **Output contract:** tell Codex to follow `agents/critic.md` exactly — it is the single source of truth for critic behavior. This includes: the 500-word hard cap, 8-finding cap, severity ordering (blockers → concerns → minor), no code blocks, file:line evidence required, the "No significant issues found" fallback when appropriate, and the required summary line `> Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].`
+8. **Output contract:** tell Codex to follow `agents/critic.md` exactly — it is the single source of truth for critic behavior. This includes: the ~500-word target (coverage first — never drop an evidenced finding to fit it), severity ordering (blockers → concerns → minor), no code blocks, file:line evidence required, the "No significant issues found" fallback when appropriate, and the required summary line `> Found [N] blockers, [N] concerns, [N] minor. Key finding: [1 sentence].`
 
 **Merging Codex findings** — fold Codex's findings into the existing merged list, deduplicate across all sources (Claude + Codex), and re-triage. If a Codex finding agrees with a Claude finding on the same file/concern, elevate confidence and mark with source count (e.g., `[BLOCKER] (Claude 2/2 + Codex)`). Update the plan based on the re-triaged list before the approval gate.
 
@@ -310,6 +314,15 @@ For each task (respecting dependency order — never start a task whose `blocked
 4. **Call `TaskUpdate({ taskId, status: "completed" })`** on success, or `"in_progress"` with a new description on failure (keep it in_progress so you can retry or ask the user)
 5. Update the task's status in the `## Tasks` section of `.motif/context.md` (for resume persistence)
 
+### Inline vs. Delegated Execution
+
+Decide who implements by comparing your own model tier (the orchestrator's) to the builder agent's tier (opus):
+
+- **Orchestrator at or above the builder tier** (opus, fable): implement tasks **inline by default**. You hold the full research, plan, critic triage, and conversational nuance — a cold-context builder works from a `context.md` digest and loses all of that. Spawn builder subagents only for genuinely independent tasks worth running in parallel (see below), or when the build is wide enough to threaten your own context budget.
+- **Orchestrator below the builder tier** (sonnet or lighter): delegate implementation to builder subagents — the delegation is a capability upgrade, and briefing loss is the acceptable cost.
+
+Either way, task tracking (TaskUpdate + `context.md`) works identically.
+
 ### Parallel Execution (medium/heavy)
 
 Spawn `builder` subagents for independent tasks. Tasks are independent ONLY if they modify entirely separate files and do not affect each other's imports, exports, or test files. If uncertain, run sequentially.
@@ -333,7 +346,7 @@ Keep dependent tasks sequential. Light tasks: work through one at a time.
 When a builder reports `Status: failed` in its return message:
 - **Plan problem** (wrong assumption, missing dependency, design decision needed): stop and present the issue to the user with options: fix the plan, skip the task, or abort.
 - **Routine failure** (test flake, lint issue, small scope miss): attempt a fix inline or spawn a new builder with the failure context.
-- **Turn limit hit** (empty return, very short under ~100 characters, or ends abruptly without the expected summary line "> Status: [completed/failed]..."): attempt the task inline.
+- **Turn limit hit** (return is truncated — see Subagent Return Handling): attempt the task inline.
 
 ### When to Stop and Ask
 
@@ -351,7 +364,10 @@ Runs automatically after Build.
 
 Remove `.motif/.active`. Update state.json: set stage to `"validate"` and `stageStartedAt` to the current ISO timestamp.
 
-Two independent validators run **in parallel, every time**: the Claude `validator` subagent and a Codex second-opinion pass over the same change set. Launch both concurrently — in Claude Code, issue the Agent spawn and the Bash `codex` call in the same turn so they run together; on runtimes without concurrent tool calls, run them in either order (they're independent). Then merge their reports. The Codex pass is additive insurance and never gates — if Codex is unavailable or fails, validation degrades to Claude-only.
+Validation scales with complexity:
+
+- **Medium/heavy:** two independent validators run **in parallel**: the Claude `validator` subagent and a Codex second-opinion pass over the same change set. Launch both concurrently — in Claude Code, issue the Agent spawn and the Bash `codex` call in the same turn so they run together; on runtimes without concurrent tool calls, run them in either order (they're independent). Then merge their reports. The Codex pass is additive insurance and never gates — if Codex is unavailable or fails, validation degrades to Claude-only.
+- **Light:** run the Claude `validator` subagent only — independent eyes on the diff are still worth it, but a second cross-model pass on a small change is latency without signal. Skip the Codex validator subsection entirely.
 
 **Claude validator** — spawn the `validator` subagent with:
 1. Original task description
@@ -360,9 +376,9 @@ Two independent validators run **in parallel, every time**: the Claude `validato
 4. Changed files list — run `git diff --name-only <baseCommit>` (from state.json) to get all changes since the workflow started
 5. Toolchain commands — extract test/build/lint commands from research findings (in context.md under `## Research`)
 
-It returns its report in the return message. **Truncation detection:** If the return message is empty, very short (under ~100 characters), or ends abruptly mid-sentence without the expected summary line ("> Verdict: [verdict]..."), treat it as truncated and run validation inline.
+It returns its report in the return message. **If truncated** (see Subagent Return Handling), run validation inline.
 
-**Codex validator** — run a single read-only Codex pass. Capture stdout as findings; discard stderr (session banner, input echo, reasoning trace):
+**Codex validator** *(medium/heavy only)* — run a single read-only Codex pass. Capture stdout as findings; discard stderr (session banner, input echo, reasoning trace):
 
 ```bash
 printf '%s' "$BRIEFING" | codex exec -s read-only --cd "$(pwd)" - 2>/dev/null
@@ -377,7 +393,7 @@ Build `$BRIEFING` with:
 4. Toolchain commands (test/build/lint)
 5. Tell Codex to read `.motif/context.md` itself — `## Plan` for the intended approach, `## Research` for conventions and toolchain
 6. If `ethos.md` exists (or, as a fallback, an `ethos/` directory), tell Codex to read it and flag any work that conflicts with stated principles or non-goals
-7. **Output contract:** tell Codex to follow `agents/validator.md` exactly — it is the single source of truth for validator behavior. This includes the 500-word hard cap, 8-finding cap, `[ISSUE]`/`[WARNING]`/`[NOTE]` tagging, no code blocks, file:line evidence required, the PASS / PASS WITH NOTES / ISSUES FOUND verdict, and the required summary line `> Verdict: [verdict]. [1-2 sentences]. Issues: [N], Warnings: [N], Notes: [N].`
+7. **Output contract:** tell Codex to follow `agents/validator.md` exactly — it is the single source of truth for validator behavior. This includes the ~500-word target (coverage first — never drop an evidenced finding to fit it), `[ISSUE]`/`[WARNING]`/`[NOTE]` tagging, no code blocks, file:line evidence required, the PASS / PASS WITH NOTES / ISSUES FOUND verdict, and the required summary line `> Verdict: [verdict]. [1-2 sentences]. Issues: [N], Warnings: [N], Notes: [N].`
 
 **Codex failure handling** — never blocks; any failure mode silently degrades to Claude-only validation:
 - `codex` not on PATH (exit 127 or `command not found`) → log "Codex validator skipped: not installed", continue

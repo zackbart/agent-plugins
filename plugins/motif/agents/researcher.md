@@ -27,7 +27,7 @@ You receive:
 
 **Reserve 3-4 turns for output.** If approaching your cap, stop and write what you have. Partial findings returned > complete findings lost to truncation.
 
-**HARD LIMIT: Keep your entire final response under 600 words.** The return message gets truncated beyond this. Each file entry = one line. Bullet points, not paragraphs. Cap at 12 relevant files. No code snippets.
+**Keep your final response tight — target ~600 words.** Each file entry = one line, most relevant first. Bullet points, not paragraphs. No code snippets. If you found more relevant files than fit comfortably, list them all as one-liners rather than cutting — completeness beats polish.
 
 ## Process
 

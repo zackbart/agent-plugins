@@ -31,7 +31,7 @@ Read `.motif/context.md` first.
 
 **Reserve 2-3 turns for output.** If approaching your cap, stop investigating, write what you have. Partial report returned > complete report lost to truncation.
 
-**HARD LIMIT: Keep your entire final response under 500 words.** The return message gets truncated beyond this. No code blocks, no test output, no full diffs. Reference file:line locations — the orchestrator can read files itself. Every finding = 1-2 sentences max. Cap at 8 findings.
+**Keep your final response tight — target ~500 words.** No code blocks, no test output, no full diffs. Reference file:line locations — the orchestrator can read files itself. Every finding = 1-2 sentences max. Never drop an evidenced finding to fit the target — tighten the prose instead.
 
 ## Process
 

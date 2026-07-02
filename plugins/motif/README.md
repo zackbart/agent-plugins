@@ -73,15 +73,15 @@ Read-only codebase exploration. Depth scales automatically based on task complex
 
 Implementation plan based on research findings. Medium and heavy tasks include tradeoff analysis and risk assessment.
 
-For medium/heavy tasks, multiple Claude critics run in parallel (2 for medium, 3 for heavy). Their findings are merged and deduplicated before triage. A cross-model second-opinion pass via the Codex CLI (if `codex` is on PATH) runs by default and is purely additive — any failure silently degrades to Claude-only review. Use `--critic skip` to bypass all critics, or `--no-codex-critic` to skip just the Codex pass.
+For medium/heavy tasks, multiple Claude critics run in parallel (2 for medium, 3 for heavy). Their findings are merged and deduplicated before triage. A cross-model second-opinion pass via the Codex CLI (if `codex` is on PATH) runs by default on medium/heavy tasks and is purely additive — any failure silently degrades to Claude-only review. Use `--critic skip` to bypass all critics, `--no-codex-critic` to skip just the Codex pass, or `--codex-critic` to force it on (even for light tasks).
 
 ### 3. Build
 
-Decomposes the plan into tasks, then executes them autonomously. On Claude Code, independent tasks run in parallel via builder subagents; elsewhere, sequentially inline.
+Decomposes the plan into tasks, then executes them autonomously. On Claude Code, an orchestrator at or above the builder's model tier (Opus, Fable) implements inline by default — it holds the full research and plan context — spawning parallel builder subagents for independent tasks; lighter orchestrators delegate every task. Elsewhere, tasks run sequentially inline.
 
 ### 4. Validate
 
-Independent audit of the completed work against the original task. On Claude Code, delegated to the validator subagent which checks diffs, runs tests, and traces callers for regressions.
+Independent audit of the completed work against the original task. On Claude Code, delegated to the validator subagent which checks diffs, runs tests, and traces callers for regressions. On medium/heavy tasks a parallel Codex second-opinion pass audits the same change set, and both reports merge into one.
 
 ## State Persistence
 
