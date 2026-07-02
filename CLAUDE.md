@@ -8,14 +8,13 @@ A Claude Code plugin marketplace. Each plugin is independent and lives in `plugi
 - `README.md` — public-facing plugin list and install instructions (has its own version table — see Version management)
 - `plugins/claude-hud/` — statusline HUD (TypeScript; needs `npm run build`)
 - `plugins/motif/` — 4-stage dev workflow (Research, Plan, Build, Validate); its `dev` skill is written to the portable Agent Skills standard, but motif ships only the Claude Code plugin
-- `plugins/helm/` — autonomous session orchestrator (discovery through PR)
 
 Each plugin has its own `CLAUDE.md` with plugin-specific context — read it before changing that plugin.
 
 ## Working on a plugin
 
 - **claude-hud** is the only plugin with a build step. From `plugins/claude-hud/`: `npm ci`, `npm run build` (compiles `src/` → `dist/`), `npm test` (build + tests). `dist/` is gitignored.
-- **motif** and **helm** are skill/agent/markdown plugins — no build.
+- **motif** is a skill/agent/markdown plugin — no build.
 - After changing any plugin, run `claude plugin validate .` from the repo root.
 
 ## Adding a new plugin

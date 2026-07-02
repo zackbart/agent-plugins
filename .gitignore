@@ -31,8 +31,6 @@ credentials/
 
 # Plugin runtime artifacts
 .motif/
-.helm/
-status/.sessions
 
 # Logs
 *.log

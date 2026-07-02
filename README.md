@@ -18,7 +18,6 @@ Personal Claude Code plugin marketplace.
 |---|---|---|
 | [claude-hud](plugins/claude-hud/) | 0.0.17 | Real-time statusline HUD for Claude Code |
 | [motif](plugins/motif/) | 0.10.2 | 4-stage development workflow (Research, Plan, Build, Validate) |
-| [helm](plugins/helm/) | 0.2.1 | Autonomous agent sessions from discovery to merged PR |
 
 ## Installation
 
@@ -33,7 +32,6 @@ Install a plugin:
 ```
 /plugin install claude-hud@agent-plugins
 /plugin install motif@agent-plugins
-/plugin install helm@agent-plugins
 ```
 
 ## Updating
@@ -52,8 +50,7 @@ agent-plugins/
 │   └── marketplace.json    # Claude Code marketplace manifest
 └── plugins/
     ├── claude-hud/         # Statusline HUD
-    ├── motif/              # Dev workflow (Research, Plan, Build, Validate)
-    └── helm/               # Autonomous orchestrator
+    └── motif/              # Dev workflow (Research, Plan, Build, Validate)
 ```
 
 Each plugin has its own `plugin.json` in `.claude-plugin/` with version tracking. See individual plugin READMEs for details.
