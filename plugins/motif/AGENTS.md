@@ -52,7 +52,7 @@ skill prose, not in parallel manifests.
 - The dev workflow supports `--critic` and `--auto` flags (or natural language equivalents) for fully autonomous runs
 - The `ask-codex` skill exposes the codex consultation pattern as a standalone capability: smart-default cold-start briefing (question + conversation summary + git diff + file/context pointers), same `codex exec -s read-only` invocation, free-form output (no critic.md contract), `**Codex says:**` verbatim reply, fire-and-forget (no persistence). DIVERGES from Stage 2 by surfacing failures clearly instead of silent-skip — the user explicitly asked, so silent skip would be wrong. The codex second opinion is a *feature that runs on Claude Code* (it shells out to the `codex` binary); it is unrelated to packaging motif for the Codex runtime. The skill also has an **image-generation mode**: when the ask is to create/edit an image, it prefixes the prompt with `$imagegen` (routes Codex to OpenAI's `gpt-image-2` image model) and invokes with `-s workspace-write` instead of read-only (image gen writes a file). The written file path is the deliverable — the one case where this skill writes to disk. Verified against codex-cli 0.141.0.
 - The orchestrator can skip research when it already has sufficient context from the conversation
-- Version is tracked in four places: `.claude-plugin/plugin.json`, root `marketplace.json`, `skills/dev/SKILL.md`, `CLAUDE.md` — keep them in sync
+- Version is tracked in four places: `.claude-plugin/plugin.json`, root `marketplace.json`, `skills/dev/SKILL.md`, `AGENTS.md` — keep them in sync
 
 ## When editing this project
 

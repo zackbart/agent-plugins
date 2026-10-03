@@ -9,7 +9,7 @@ A Claude Code plugin marketplace. Each plugin is independent and lives in `plugi
 - `plugins/claude-hud/` — statusline HUD (TypeScript; needs `npm run build`)
 - `plugins/motif/` — 4-stage dev workflow (Research, Plan, Build, Validate); its `dev` skill is written to the portable Agent Skills standard, but motif ships only the Claude Code plugin
 
-Each plugin has its own `CLAUDE.md` with plugin-specific context — read it before changing that plugin.
+Each plugin has its own `AGENTS.md` with plugin-specific context — read it before changing that plugin.
 
 ## Working on a plugin
 
@@ -20,7 +20,7 @@ Each plugin has its own `CLAUDE.md` with plugin-specific context — read it bef
 ## Adding a new plugin
 
 1. Create `plugins/<name>/` with a `.claude-plugin/plugin.json` (at minimum `name` and `version`)
-2. Add a `CLAUDE.md` in the plugin directory documenting plugin-specific context
+2. Add a `AGENTS.md` in the plugin directory documenting plugin-specific context
 3. Add an entry to `.claude-plugin/marketplace.json` with `source: "./plugins/<name>"` (mirror `name`, `description`, `version`, `author`, `license`, `category`, `keywords` from the existing entries)
 4. Add a row to the `README.md` version table
 5. Run `claude plugin validate .` to verify
@@ -33,7 +33,7 @@ A plugin's version is mirrored across several files. `plugin.json` is the source
 - `.claude-plugin/marketplace.json` — that plugin's entry
 - `README.md` — version table row
 - `plugins/claude-hud/package.json` — **claude-hud only**
-- `plugins/motif/skills/dev/SKILL.md` and `plugins/motif/CLAUDE.md` — **motif only**
+- `plugins/motif/skills/dev/SKILL.md` and `plugins/motif/AGENTS.md` — **motif only**
 
 The README table drifts easily — verify it after any version change.
 
